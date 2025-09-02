@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "Nexo AI",
   description: "AI powered Chat App",
   icons : {
-    icon : "/nexo.png"
+    icon : "/nexo.ico"
   } 
 };
 
