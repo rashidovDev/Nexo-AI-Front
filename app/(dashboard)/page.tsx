@@ -6,10 +6,28 @@ import LeftBar from './components/leftbar';
 import Footer from './components/footer';
 import { useRouter } from 'next/navigation';
 import AddContact from './components/add-contact';
-import Chat from './components/chat';
+import Chat from './components/chat-component/chat';
+import { useCurrentChatUser } from '@/services/current-chat';
+import { useForm } from 'react-hook-form';
+import z from 'zod';
+import { contactSchema, emailSchema } from '@/lib/validation';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const Home = () => {
   const router = useRouter();
+  const {currentChatUser} = useCurrentChatUser()
+
+  const contactForm = useForm<z.infer<typeof contactSchema>>({
+          resolver : zodResolver(contactSchema),
+          defaultValues: {
+              email: '',
+              name : ''
+          }
+      })
+
+      const onCreateContact = (values: z.infer<typeof contactSchema>) => {
+          console.log(values)
+      }
 
   useEffect(() => {
      router.replace("/")
@@ -44,12 +62,13 @@ const Home = () => {
         
         
       </div>
-      {/* ADD CONTACT */}
-      <AddContact/>
-
+      <div className='pl-[350px]'>
+        {/* ADD CONTACT */}
+      {!currentChatUser?._id &&  <AddContact contactForm={contactForm} onCreateContact={onCreateContact}/>}
        {/* CHAT */}
-       <Chat/>
-      {/* MESSAGE */}
+       {currentChatUser?._id &&  <Chat/>}
+      </div>
+      
     </div>
     
   )
