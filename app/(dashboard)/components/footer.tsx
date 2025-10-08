@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 const icons = [
   {id: 1, name: 'chats', icon: IoIosChatbubbles},
-  {id: 2, name: 'profile', icon: FaRegUserCircle},
+  {id: 2, name: 'contacts', icon: FaRegUserCircle},
   {id: 3, name: 'settings', icon: IoSettingsOutline}
 ]
 
@@ -18,7 +18,7 @@ const icons = [
 const Footer = () => {
   const {selectedOption,setSelectedOption} = useSelectedOption()
   return (
-    <div className='absolute bottom-0 flex justify-around items-center w-full h-12 border-t'>
+    <div className='absolute bottom-0 flex justify-around items-center w-full h-[5vh] border-t'>
         {
           icons.map(({id, name, icon: Icon}) => (
             <div key={id} onClick={() => setSelectedOption(name.toLowerCase() as 'chats' | 'contacts' | 'settings')}

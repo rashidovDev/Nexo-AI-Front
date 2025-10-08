@@ -3,8 +3,18 @@ import { Button } from '@/components/ui/button'
 import { useCurrentChatUser } from '@/services/current-chat'
 import { Settings2 } from 'lucide-react'
 import React from 'react'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { Separator } from '@/components/ui/separator'
 
 const TopChat = () => {
+
     const { currentChatUser } = useCurrentChatUser()
   return (
     <div className='w-full flex items-center justify-between sticky top-0 z-50 h-[6vh] p-2 border-b bg-background'>
@@ -40,9 +50,63 @@ const TopChat = () => {
                      {/* ONLINE */}
                 </div>
         </div>
-        <Button size={'icon'} variant={'secondary'}>
+		<Sheet>
+  <SheetTrigger asChild>
+	   <Button size={'icon'} type='button' variant={'secondary'}>
           <Settings2/>
         </Button>
+  </SheetTrigger>
+  <SheetContent>
+    <SheetHeader>
+      <SheetTitle/>
+    </SheetHeader>
+	<div className='mx-auto w-1/2 max-md:w-1/4 h-36 relative'>
+						<Avatar className='w-full h-36'>
+							<AvatarImage src={currentChatUser?.avatar} alt={currentChatUser?.email} className='object-cover' />
+							<AvatarFallback className='text-6xl uppercase font-spaceGrotesk'>{currentChatUser?.email[0]}</AvatarFallback>
+						</Avatar>
+					</div>
+					<Separator className='my-2' />
+
+					<h1 className='text-center capitalize font-spaceGrotesk text-xl'>{currentChatUser?.email}</h1>
+
+					<div className='flex flex-col space-y-1'>
+						{currentChatUser?.firstName && (
+							<div className='flex items-center gap-1 mt-4'>
+								<p className='font-spaceGrotesk'>First Name: </p>
+								<p className='font-spaceGrotesk text-muted-foreground'>{currentChatUser?.firstName}</p>
+							</div>
+						)}
+						{currentChatUser?.lastName && (
+							<div className='flex items-center gap-1 mt-4'>
+								<p className='font-spaceGrotesk'>Last Name: </p>
+								<p className='font-spaceGrotesk text-muted-foreground'>{currentChatUser?.lastName}</p>
+							</div>
+						)}
+						{currentChatUser?.bio && (
+							<div className='flex items-center gap-1 mt-4'>
+								<p className='font-spaceGrotesk'>
+									About: <span className='font-spaceGrotesk text-muted-foreground'>{currentChatUser?.bio}</span>
+								</p>
+							</div>
+						)}
+					    {/* <Separator className='my-2' />
+						<h2 className='text-xl'>Image</h2>
+						<div className='flex flex-col space-y-2'>
+							{messages
+								.filter(msg => msg.image)
+								.map(msg => (
+									<div className='w-full h-36 relative' key={msg._id}>
+										<Image src={msg.image} alt={msg._id} fill className='object-cover rounded-md' />
+									</div>
+								))}
+						</div> */}
+					</div>
+
+					
+  </SheetContent>
+</Sheet>
+     
     </div>
   )
 }

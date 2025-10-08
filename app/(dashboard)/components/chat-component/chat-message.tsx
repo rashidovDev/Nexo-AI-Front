@@ -4,28 +4,18 @@ import React from 'react'
 
 const ChatMessage = () => {
   return (
-    <div className='flex flex-col justify-end z-40 min-h-[94vh]'>
+    <div className='flex flex-col justify-end z-40 min-h-[89vh]'>
         {/* LOADING */}
         {/* <ChatLoading/> */}
+
+        {/* START CHATTING */}
+     
         
 
-        {/* MESSAGES */}
+        MESSAGES
         <MessageCard isReceived/>
          <MessageCard />
-
-         <MessageCard isReceived/>
-         <MessageCard />
-
-         <MessageCard isReceived/>
-         <MessageCard />
-         <MessageCard isReceived/>
-         <MessageCard />
-         <MessageCard isReceived/>
-         <MessageCard />
          
-
-
-        {/* MESSAGE INPUT */}
 
     </div>
   )

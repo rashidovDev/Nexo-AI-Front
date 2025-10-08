@@ -10,12 +10,16 @@ import Chat from './components/chat-component/chat';
 import { useCurrentChatUser } from '@/services/current-chat';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
-import { contactSchema, emailSchema } from '@/lib/validation';
+import { contactSchema, emailSchema, messageSchema } from '@/lib/validation';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useSelectedOption } from '@/services/current-option';
+import Contacts from './components/contacts';
+import Settings from './components/settings';
 
 const Home = () => {
   const router = useRouter();
   const {currentChatUser} = useCurrentChatUser()
+  const {selectedOption} = useSelectedOption()
 
   const contactForm = useForm<z.infer<typeof contactSchema>>({
           resolver : zodResolver(contactSchema),
@@ -25,14 +29,26 @@ const Home = () => {
           }
       })
 
-      const onCreateContact = (values: z.infer<typeof contactSchema>) => {
-          console.log(values)
-      }
+       const messageForm = useForm<z.infer<typeof messageSchema>>({
+          resolver : zodResolver(messageSchema),
+          defaultValues: {
+             message : '',
+             image : ''
+          }
+      })
 
   useEffect(() => {
      router.replace("/")
   }, []);
  
+
+    const onCreateContact = (values: z.infer<typeof contactSchema>) => {
+          console.log(values)
+      }
+
+       const onSendMessage = (values: z.infer<typeof messageSchema>) => {
+          console.log(values)
+      }
   return (
     <div>
       {/* Sidebar */}
@@ -54,7 +70,11 @@ const Home = () => {
         </div> */}
 
         {/* {CHATS} */}
-        <Chats chats={chats} />
+        {selectedOption === 'chats' ?  <Chats chats={chats} /> 
+        :  selectedOption === 'contacts' ? <Contacts chats={chats}/> 
+        : selectedOption === 'settings' && <Settings/>
+        }
+       
         <Footer/>
         </div>
 
@@ -64,9 +84,9 @@ const Home = () => {
       </div>
       <div className='pl-[350px]'>
         {/* ADD CONTACT */}
-      {!currentChatUser?._id &&  <AddContact contactForm={contactForm} onCreateContact={onCreateContact}/>}
+       {!currentChatUser?._id &&  <AddContact contactForm={contactForm} onCreateContact={onCreateContact}/>}
        {/* CHAT */}
-       {currentChatUser?._id &&  <Chat/>}
+       {currentChatUser?._id &&  <Chat messageForm={messageForm} onSendMessage={onSendMessage}/>}
       </div>
       
     </div>
@@ -81,11 +101,16 @@ const chats = [
     _id: '1',
     name: "John Doe",
     email: "jajdjd@gmail.com",
-  avatar : "https://github.com/shadcn.png"},
+  avatar : "https://github.com/shadcn.png",
+   firstName : "Anvar",
+   lastname : "Rashidov"
+},
+
+ 
    {
     _id: '2',
     name: "Adam Doe",
-    email: "jajdjd@gmail.com"},
+    email: "asasd@gmail.com"},
       {
     _id: '3',
     name: "Muham Doe",
