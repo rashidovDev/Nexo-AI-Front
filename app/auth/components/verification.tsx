@@ -15,7 +15,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp"
 import { useForm } from 'react-hook-form'
-import z from 'zod'
+import z, { success } from 'zod'
 import { otpSchema } from '@/lib/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -23,9 +23,18 @@ import { Input } from '@/components/ui/input'
 import { REGEXP_ONLY_DIGITS } from 'input-otp'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/services/use-auth'
+import { apiClient } from '@/api/axios'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from '@/hooks/use-toast'
+import { IError } from '@/types'
+import { signIn, signOut } from 'next-auth/react'
+import { useRouter } from 'next/router'
+
 
 const Verify  = () => {
   const {email} = useAuthStore()
+
+
    const form = useForm<z.infer<typeof otpSchema>>({
           resolver : zodResolver(otpSchema),
           defaultValues: {
@@ -33,10 +42,33 @@ const Verify  = () => {
               otp: ''
           }
       })
+
+      const {mutate, isPending} = useMutation(
+      {
+        mutationFn: async ( otp : string) => {
+          const {data} = await apiClient.post('/user/verify', { email: email, otp })
+          console.log(data)
+          return data
+        },
+
+       onSuccess: async ({user}) => {
+        console.log("USER",user.email)
+        await signIn('credentials', { email: user.email })
+       toast({ description: 'Successfully verified' })
+        },
+
+        onError: (error : IError) => {
+          if(error?.response?.data?.message) {
+            toast({ description: error.response.data.message, variant: 'destructive' })
+      }
+      return toast({ description: 'Something went wrong', variant: 'destructive' })
+    }
+  })
   
       function onSubmit(values: z.infer<typeof otpSchema>) {
-          console.log(values)
+           mutate(values.otp)
       }
+
   return (
     <div className='w-full max-w-md mx-auto'>
           <Form {...form}>
@@ -86,7 +118,7 @@ const Verify  = () => {
             </FormItem>
           )}
         />
-        <Button className='w-full' size={"lg"} type="submit">Submit</Button>
+        <Button className='w-full' size={"lg"} type="submit" disabled={isPending}>Submit</Button>
       </form>
     </Form>
     </div>

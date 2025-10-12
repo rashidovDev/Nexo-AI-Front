@@ -10,12 +10,15 @@ import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { LogIn, Moon, Sun, VolumeOff } from 'lucide-react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTheme } from 'next-themes'
 import React, { useState } from 'react'
 
 const Settings = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const { resolvedTheme, setTheme } = useTheme()
+  const {data: session} = useSession()
+
   return (
     <div className='px-3'>
 
@@ -26,7 +29,7 @@ const Settings = () => {
 						</Avatar>
             <div className='ml-3'>
           <h1 className='text-md font-spaceGrotesk font-semibold'>Anvar Rashidov</h1>
-          <p className='text-sm text-muted-foreground'>anvarrashidov17@gmail.com</p>
+          <p className='text-sm text-muted-foreground'>{session?.currentUser?.email}</p>
             </div>
      </div>
 
@@ -50,7 +53,9 @@ const Settings = () => {
 							/>
 						</div>
 
-     <div className='flex justify-between items-center bg-destructive p-2 cursor-pointer rounded-md my-2' >
+     <div 
+	 onClick={() => signOut()}
+	 className='flex justify-between items-center bg-destructive p-2 cursor-pointer rounded-md my-2' >
 							<div className='flex items-center gap-1'>
 								<LogIn size={16} />
 								<span className='text-sm'>Logout</span>

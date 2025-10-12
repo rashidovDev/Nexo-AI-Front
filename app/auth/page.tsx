@@ -3,8 +3,13 @@ import { LuMessagesSquare } from "react-icons/lu";
 import StateAuth from './components/state';
 import Social from './components/social';
 import ModeToggle from '@/components/ui/custom/mode-toggle';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-option';
+import { redirect } from 'next/navigation';
 
-const Page = () => {
+const Page = async () => {
+  const session = await getServerSession(authOptions)
+  if(session) return redirect('/')
   return (
     <div>
     <div className='fixed top-4 right-4'>

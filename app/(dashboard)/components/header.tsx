@@ -2,11 +2,13 @@
 
 import ModeToggle from '@/components/ui/custom/mode-toggle'
 import { Input } from '@/components/ui/input'
+import { connectToDatabase } from '@/lib/mongoose'
 import { useSelectedOption } from '@/services/current-option'
 import { Search, SquarePen } from 'lucide-react'
 import React from 'react'
 
 const Header = () => {
+  
 
   const {selectedOption} = useSelectedOption()
   
