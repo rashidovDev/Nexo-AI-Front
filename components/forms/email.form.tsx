@@ -23,16 +23,22 @@ import z from 'zod'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { REGEXP_ONLY_DIGITS } from 'input-otp'
+import { signOut, useSession } from 'next-auth/react'
+import { useMutation } from '@tanstack/react-query'
+import { generateToken } from '@/lib/generate-token'
+import { apiClient } from '@/api/axios'
+import { toast } from '@/hooks/use-toast'
 
 const EmailForm = () => {
 
   const [verify, setVerify] = useState(false)
+  const {data : session, update} =  useSession()
 
     const emailform = useForm<z.infer<typeof oldEmailSchema>>({
         resolver : zodResolver(oldEmailSchema),
         defaultValues: {
             email : '',
-            oldEmail : 'anvarrashidov17@gmail.com'
+            oldEmail :  session?.currentUser?.email || '',
         }
     })
 
@@ -40,25 +46,58 @@ const EmailForm = () => {
       resolver : zodResolver(otpSchema),
       defaultValues: {
           otp : '',
-          email : ''
+          email :  '',
       }
   })
+const otpMutation = useMutation({
+  mutationFn: async (email: string) => {
+    const token = await generateToken(session?.currentUser);
+    const { data } = await apiClient.post<{ email: string }>(
+      '/user/send-otp',
+      { email },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return data;
+  },
 
-    const onEmailSubmit = (values : z.infer<typeof emailSchema>) => {
-        console.log(values)
-        otpForm.setValue('email', values.email)
-        setVerify(true)
-    }
+  onSuccess: ({ email }) => {
+    toast({ description: 'OTP sent to your email' });
+    otpForm.setValue('email', email);
+    setVerify(true);
+  },
+});
 
-    const onOtpSubmit = (data : z.infer<typeof otpSchema>) => {
-      console.log(data)
-  }
 
-  return verify ? (
-<Form {...otpForm}>
-			<form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className='space-y-2'>
+   function onEmailSubmit(values: z.infer<typeof oldEmailSchema>) {
+		otpMutation.mutate(values.email)
+	}
+
+  const verifyMutation = useMutation({
+		mutationFn: async (otp: string) => {
+			const token = await generateToken(session?.currentUser)
+			const { data } = await apiClient.put(
+				'/user/change-email',
+				{ email: otpForm.getValues('email'), otp },
+				{ headers: { Authorization: `Bearer ${token}` } }
+			)
+      console.log('Change email response data:', data)
+			return data
+		},
+		onSuccess: () => {
+			toast({ description: 'Email updated successfully' })
+			signOut()
+		},
+	})
+
+   function onVerifySubmit(values: z.infer<typeof otpSchema>) {
+		verifyMutation.mutate(values.otp)
+	}
+
+  return verify ? ( 
+<Form {...otpForm}> 
+			<form onSubmit={otpForm.handleSubmit(onVerifySubmit)} className='space-y-2'>
 				<Label>New email</Label>
-				<Input className='h-10 bg-secondary' disabled value={otpForm.watch('email')} />
+				<Input className='h-10 bg-secondary' disabled value={otpForm.watch('email') || ''} />
 				<FormField
 					control={otpForm.control}
 					name='otp'
@@ -66,7 +105,8 @@ const EmailForm = () => {
 						<FormItem>
 							<Label>One-Time Password</Label>
 							<FormControl>
-								 <InputOTP maxLength={6} {...field} pattern={REGEXP_ONLY_DIGITS} className='w-full'>
+								 <InputOTP maxLength={6} {...field} pattern={REGEXP_ONLY_DIGITS} 
+                 disabled={verifyMutation.isPending} className='w-full'>
                                   <InputOTPGroup className='w-full'>
                                     <InputOTPSlot index={0}  className='w-full'/>
                                     <InputOTPSlot index={1}  className='w-full'/>
@@ -88,7 +128,7 @@ const EmailForm = () => {
 						</FormItem>
 					)}
 				/>
-				<Button type='submit' className='w-full' disabled>
+				<Button type='submit' className='w-full' disabled={verifyMutation.isPending}>
 					Submit
 				</Button>
 			</form>
@@ -115,7 +155,7 @@ const EmailForm = () => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <Label>Email</Label>
+              <Label>New Email</Label>
               <FormControl>
                 <Input placeholder="Please enter your email" {...field} />
               </FormControl> 
@@ -123,7 +163,7 @@ const EmailForm = () => {
             </FormItem> 
           )}
         />
-        <Button className='w-full' type="submit">Submit</Button>
+        <Button className='w-full' type="submit" disabled={otpMutation.isPending}>Submit</Button>
       </form>
     </Form>
   )

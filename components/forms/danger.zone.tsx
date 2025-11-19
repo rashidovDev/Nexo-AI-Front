@@ -23,12 +23,35 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from '../ui/input'
+import { generateToken } from '@/lib/generate-token'
+import { apiClient } from '@/api/axios'
+import { signOut, useSession } from 'next-auth/react'
+import { useMutation } from '@tanstack/react-query'
 
 const DangerZone = () => {
+
+  const { data: session } = useSession()
+
+
   const form = useForm<z.infer<typeof confirmTextSchema>>({
 		resolver: zodResolver(confirmTextSchema),
 		defaultValues: { confirmText: '' },
 	})
+
+	const { mutate, isPending } = useMutation({
+  	mutationFn: async () => {
+			const token = await generateToken(session?.currentUser)
+			const { data } = await apiClient.delete('/user/delete-user', { headers: { Authorization: `Bearer ${token}` } })
+			return data
+		},
+		onSuccess: () => {
+			signOut()
+		},
+	})
+
+	function onSubmit() {
+		mutate()
+	}
   return (
     <>
     <p className='text-xs text-muted-foreground text-center'> Are you sure you want to delete your account? 
@@ -49,7 +72,7 @@ const DangerZone = () => {
       </DialogDescription>
     </DialogHeader>
     <Form {...form}>  
-        <form onSubmit={form.handleSubmit((data) => console.log(data))} className='space-y-2 mt-4'> 
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2 mt-4'> 
           <FormField
 								control={form.control}
 								name='confirmText'
@@ -59,13 +82,13 @@ const DangerZone = () => {
 											Please type <span className='font-bold'>DELETE</span> to confirm.
 										</FormDescription>
 										<FormControl>
-											<Input className='bg-secondary' disabled {...field} />
+											<Input className='bg-secondary' disabled={isPending} {...field} />
 										</FormControl>
 										<FormMessage className='text-xs text-red-500' />
 									</FormItem>
 								)}
 							/>
-          <Button className='w-full font-bold' type='submit' variant='destructive'>
+          <Button disabled={isPending} className='w-full font-bold' type='submit' variant='destructive'>
             I understand, delete my account
           </Button>
         </form>

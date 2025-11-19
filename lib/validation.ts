@@ -13,18 +13,19 @@ export const otpSchema = z.object({
 }).merge(emailSchema)
 
 export const contactSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters").max(30,"Name must be at most 50 characters"),
+  username: z.string().min(2, "Name must be at least 2 characters").max(30,"Name must be at most 50 characters").optional(),
 }).merge(emailSchema)
 
 
 export const messageSchema = z.object({
-  message: z.string().min(1, "Message can not be empty"),
+  text: z.string().min(1, "Message can not be empty"),
   image : z.string().optional()
 })
 
 export const profileSchema = z.object({
 	firstName: z.string().min(2),
 	lastName: z.string().optional(),
+  username : z.string().max(20, "Username must be at most 20 characters"),
 	bio: z.string().optional(),
 })
   

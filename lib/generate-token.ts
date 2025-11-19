@@ -7,6 +7,6 @@ export const generateToken  = async (user? : IUser) => {
     if (!secret) {
         throw new Error('NEXT_PUBLIC_JWT_SECRET is not defined');
     }
-    const token = jwt.sign({user}, secret, {expiresIn: '1h'});
+    const token = jwt.sign({ userId: user?._id }, secret, { expiresIn: '1h' });
     return token;
 }

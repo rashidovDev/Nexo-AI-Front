@@ -1,4 +1,4 @@
-import React, { FC, useReducer, useRef } from 'react'
+import React, { FC, useEffect, useReducer, useRef } from 'react'
 import TopChat from './top-chat'
 import ChatMessage from './chat-message'
 import { UseFormReturn } from 'react-hook-form'
@@ -16,27 +16,33 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { useTheme } from 'next-themes'
+import { IMessage } from '@/types'
 
 interface Props {
   onSendMessage : (value : z.infer <typeof messageSchema>) => void
+  onReadMessages: () => Promise<void>
   messageForm : UseFormReturn<z.infer <typeof messageSchema>>
+  messages : IMessage[]
 }
 
-const Chat :FC<Props> = ({onSendMessage, messageForm}) => {
+const Chat :FC<Props> = ({onSendMessage, messageForm, messages, onReadMessages}) => {
   const {resolvedTheme} = useTheme() 
   const inputRef = useRef<HTMLInputElement | null >(null)
 
+  useEffect(() => {
+  onReadMessages()
+  },[messages])
 
 	const handleEmojiSelect = (emoji: string) => {
 		const input = inputRef.current
 		if (!input) return
 
-		const text = messageForm.getValues('message')
+		const text = messageForm.getValues('text')
 		const start = input.selectionStart ?? 0
 		const end = input.selectionEnd ?? 0
 
 		const newText = text.slice(0, start) + emoji + text.slice(end)
-		messageForm.setValue('message', newText)
+		messageForm.setValue('text', newText)
 
 		setTimeout(() => {
 			input.setSelectionRange(start + emoji.length, start + emoji.length)
@@ -49,7 +55,7 @@ const Chat :FC<Props> = ({onSendMessage, messageForm}) => {
      <TopChat/>
 
      {/* MESSAGES  h-90vh */}
-     <ChatMessage/> 
+     <ChatMessage messages={messages} onSendMessage={onSendMessage}/> 
 
        {/* <div className='w-full h-[88vh] flex items-center justify-center'>
 					<div className='text-[100px] cursor-pointer' onClick={() => onSubmitMessage({ text: '✋' })}>
@@ -76,7 +82,7 @@ const Chat :FC<Props> = ({onSendMessage, messageForm}) => {
 
       <FormField
         control={messageForm.control}
-        name='message'
+        name='text'
         render={({ field }) => (
           <FormItem className='w-full h-full'>
             <FormControl>
@@ -93,6 +99,7 @@ const Chat :FC<Props> = ({onSendMessage, messageForm}) => {
 										}}
                 ref = {inputRef}
               />
+            
             </FormControl>
           </FormItem>
         )}

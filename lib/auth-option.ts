@@ -13,42 +13,36 @@ export const authOptions: NextAuthOptions = {
 			async authorize(credentials) {
 				await connectToDatabase()
 				const user = await User.findOne({ email: credentials?.email })
+        console.log('USER AUTH', user)
 				return user
 			},
 		}),
-		// GithubProvider({
-		// 	clientId: process.env.GITHUB_CLIENT_ID!,
-		// 	clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-		// }),
-		// GoogleProvider({
-		// 	clientId: process.env.GOOGLE_CLIENT_ID!,
-		// 	clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-		// }),
+		GithubProvider({
+			clientId: process.env.GITHUB_CLIENT_ID!,
+			clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+		}),
+		GoogleProvider({
+			clientId: process.env.GOOGLE_CLIENT_ID!,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+		}),
 	],
 	callbacks: {
-    
 		async session({ session }) {
-  console.log("SESSION CALLBACK - before DB check", session)
-
-  await connectToDatabase()
-  const isExistingUser = await User.findOne({ email: session.user?.email })
-  console.log("SESSION CALLBACK - DB user", isExistingUser)
-
-  if (!isExistingUser) {
-    const user = await User.create({
-      email: session.user?.email,
-      isVerified: true,
-      avatar: session.user?.image,
-    })
-    session.currentUser = user
-    console.log("SESSION CALLBACK - new user added", session)
-    return session
-  }
-
-  session.currentUser = isExistingUser
-  console.log("SESSION CALLBACK - returning session", session)
-  return session
-},
+			console.log('SESSION CALLBACK', session)
+			await connectToDatabase()
+			const isExistingUser = await User.findOne({ email: session.user?.email })
+			if (!isExistingUser) {
+				const user = await User.create({
+					email: session.user?.email,
+					isVerified: true,
+					avatar: session.user?.image,
+				})
+				session.currentUser = user
+				return session
+			}
+			session.currentUser = isExistingUser
+			return session
+		},
 	},
 	session: { strategy: 'jwt' },
 	jwt: { secret: process.env.NEXT_PUBLIC_JWT_SECRET },

@@ -15,14 +15,12 @@ const userSchema = new Schema({
         enum: UserStatus,
         default: UserStatus.ACTIVE
     },
+    firstName: { type: String },   
+    lastName: { type: String },
     email: { type: String, required: true, unique: true },
     username: {
         type: String,
         index: { unique: true, sparse: true},
-    },
-    userPassword:{
-        type:String, 
-        select: false, 
     },
    userImage: {
     url: String,
@@ -32,6 +30,7 @@ const userSchema = new Schema({
     notificationSound : {type : String, default: 'notification.mp3'},
     sendingSound : {type : String, default: 'sending.mp3'},
     lastSeen: { type: Date },
+    muted: { type: Boolean, default: false },
     contacts: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 },
    { timestamps:true}  // updateAt createAt

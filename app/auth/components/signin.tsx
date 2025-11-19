@@ -41,15 +41,15 @@ const Signin = () => {
         },
         onSuccess: (data) => {
           setStep('verify')
-          setEmail(data.email)
+          setEmail(form.getValues('email'))
           toast({ description: data.message })
         },
-        onError: (error : IError) => {
-          if(error?.response?.data?.message) {
-            toast({ description: error.response.data.message, variant: 'destructive' })
-      }
-      return toast({ description: 'Something went wrong', variant: 'destructive' })
-    }
+    //     onError: (error : IError) => {
+    //       if(error?.response?.data?.message) {
+    //         toast({ description: error.response.data.message, variant: 'destructive' })
+    //   }
+    //   return toast({ description: 'Something went wrong', variant: 'destructive' })
+    // }
   })
 
     function onSubmit(values: z.infer<typeof emailSchema>) {
@@ -57,26 +57,33 @@ const Signin = () => {
     }
 
   return (
-    <div className='w-full max-w-md mx-auto'>
-         <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <Label>Email</Label>
-              <FormControl>
-                <Input disabled={isPending} placeholder="Please enter your email" {...field} />
-              </FormControl> 
-              <FormMessage />
-            </FormItem> 
-          )}
-        />
-        <Button className='w-full' type="submit" disabled={isPending}>Submit</Button>
-      </form>
-    </Form>
-    </div>
+   <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
+  <Form {...form}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 sm:max-w-md md:max-w-lg lg:max-w-xl">
+      <FormField
+        control={form.control}
+        name="email"
+        render={({ field }) => (
+          <FormItem>
+            <Label>Email</Label>
+            <FormControl>
+              <Input
+                disabled={isPending}
+                placeholder="Please enter your email"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <Button className="w-full" type="submit" disabled={isPending}>
+        Submit
+      </Button>
+    </form>
+  </Form>
+</div>
+
   )
 }
 
