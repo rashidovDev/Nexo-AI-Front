@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
+import React, { ChangeEvent, useEffect, useRef, useState } from "react"
 import Chats from "./components/chats"
 import Header from "./components/header"
 import LeftBar from "./components/leftbar"
@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useSelectedOption } from "@/services/current-option"
 import Contacts from "./components/contacts"
 import Settings from "./components/settings"
-import { IChat, IMessage, IUser } from "@/types"
+import { IChat, IMessage, IMessageChat, IMsgChat, IUser } from "@/types"
 import AddContactCard from "@/components/cards/add-contact-card"
 import { useDialog } from "@/services/use-dialog"
 import { useLoading } from "@/services/use-loading"
@@ -34,7 +34,7 @@ import { set } from "mongoose"
 interface GetSocketType {
   receiver: IUser
   sender: IUser
-  message: IMessage
+  message: IMsgChat
 }
 
 const Home = () => {
@@ -45,9 +45,9 @@ const Home = () => {
   const [chats, setChats] = useState<IChat[]>([])
   const socket = useRef<ReturnType<typeof io> | null>(null)
 
-  const { setCreating, setLoadMessages } = useLoading()
+  const { setCreating, setLoadMessages, setTyping } = useLoading()
   const { currentChatUser, currentChatId } = useCurrentChatUser()
-  const { selectedOption, searchQuery } = useSelectedOption()
+  const { selectedOption, searchQuery, editedMessage, setEditedMessage } = useSelectedOption()
   const { openAddContactDialog } = useDialog()
   const { setOnlineUsers } = useAuthStore()
   const { playSound } = useAudio()
@@ -102,6 +102,24 @@ const Home = () => {
       })
     })
 
+    socket.current.on("getNewChatCreated", ({ message, receiver }: { message: IMessageChat; receiver: IUser }) => {
+     
+  setChats((prev) => {
+  const isExist = prev.some((item) => item._id === message.chat._id)
+  return isExist
+    ? prev
+    : [
+        ...prev,
+        {
+          _id: message.chat?._id,
+          participants: message.chat?.participants,
+          lastMessage: message.chat?.lastMessage,
+          isGroup: false, // required
+        } as IChat,
+      ]
+})
+    })
+
     socket.current?.on('messagesReadByReceiver', (messages: IMessage[]) => {
      
 				setMessages(prev => {
@@ -114,7 +132,7 @@ const Home = () => {
        setChats(prev =>
     prev.map(chat => {
     const lastMsg = messages.find(msg => msg._id === chat.lastMessage?._id);
-    console.log("Last Msg in chat:", lastMsg);
+
     if (lastMsg) {
       return {
         ...chat,
@@ -133,7 +151,8 @@ const Home = () => {
 
     socket.current.on("getNewMessage", ({ message, receiver, sender }: GetSocketType) => {
        setAllMessages((prev) => [...prev, message])
-     if(currentChatId === message.chat) {    
+       
+     if(currentChatId === message.chat._id.toString()) {    
         setMessages((prev) => {  
         const isExist = prev.some((item) => item._id === message._id)
         return isExist ? prev : [...prev, message]
@@ -155,14 +174,57 @@ const Home = () => {
 
     })
 
+    socket.current?.on('getUpdatedMessage', ( {updatedMessage, receiver, sender}  ) => {
+				// setTyping({ message: '', sender: null })
+				setMessages(prev =>
+					prev.map(item =>
+						item._id === updatedMessage._id ? { ...item, reactions: updatedMessage.reactions, text: updatedMessage.text } : item
+					)
+				)
+				setChats(prev =>
+					prev.map(item =>
+						item._id === currentChatId
+							? { ...item, lastMessage: item.lastMessage?._id === updatedMessage._id ? updatedMessage : item.lastMessage }
+							: item
+					)
+				)
+			})
 
+    socket.current?.on('getDeletedMessage', ( {deletedMessage, receiver, sender, filteredMessages}  ) => {
+        // setTyping({ message: '', sender: null })
+    
+      setMessages (filteredMessages)
+      const lastMessage = filteredMessages.length ? filteredMessages[filteredMessages.length - 1] : null;
+          setChats(prev =>
+  prev.map(item =>
+    item._id === currentChatId
+      ? ({
+          ...item,
+          lastMessage:  
+            item.lastMessage && item.lastMessage._id === deletedMessage._id
+              ? lastMessage // your new value
+              : item.lastMessage
+        } as IChat)
+      : item
+  )
+);
+    })
+
+    socket.current?.on("getTypingMessage", ({ message, sender, receiver }: { message: string; sender: IUser, receiver : IUser }) => {
+          if(receiver._id !== currentChatUser?._id){
+           setTyping({ sender, message})
+          }
+
+       
+        
+    })
 
     return () => {
       socket.current?.off("getOnlineUsers")
       socket.current?.off("getNewContact")
       socket.current?.off("getNewMessage")
     }
-  }, [playSound, session?.currentUser, currentChatUser?._id])
+  },[playSound, session?.currentUser, currentChatUser?._id])
 
   // 🔹 FETCH CONTACTS
   const getContacts = async () => {
@@ -173,6 +235,7 @@ const Home = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       setContacts(data.contacts)
+      
     } catch {
       toast({ description: "Cannot fetch contacts", variant: "destructive" })
     } finally {
@@ -189,6 +252,7 @@ const Home = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       setChats(data)
+     
     } catch {
       toast({ description: "Cannot fetch chats", variant: "destructive" })
     } finally {
@@ -203,6 +267,7 @@ const Home = () => {
   // 🔹 FETCH MESSAGES
   const getMessages = async () => {
     setLoadMessages(true)
+    setMessages([])
     const token = await generateToken(session?.currentUser)
     try {
       const { data } = await apiClient.get<{ messages: IMessage[] }>(
@@ -272,41 +337,7 @@ const Home = () => {
   }
 
   // 🔹 SEND MESSAGE
-  const onSendMessage = async (values: z.infer<typeof messageSchema>) => {
-    setCreating(true)
-    const token = await generateToken(session?.currentUser)
-    try {
-      const { data } = await apiClient.post<GetSocketType>(
-        "/message/send-msg",
-        { ...values, receiver: currentChatUser?._id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      console.log("Sent message response:", data)
-      setMessages((prev) => {
-     if (data.message.chat === prev[0]?.chat) {
-       return [...prev, data.message];
-       }
-      return prev;
-    });
-      setChats((prev) =>
-        prev.map((chat) =>
-          chat.participants.some((u) => u._id === currentChatUser?._id)
-            ? { ...chat, lastMessage: {...data.message} }
-            : chat
-        )
-      ) 
-      messageForm.reset()
-      socket.current?.emit("sendMessage", {
-        message: data.message,
-        receiver: data.receiver,
-        sender: data.sender,
-      })
-    } catch {
-      toast({ description: "Failed to send message", variant: "destructive" })
-    } finally {
-      setCreating(false)
-    }
-  }
+
 
   const onReadMessages = async () => {
 		const receivedMessages = messages
@@ -350,18 +381,205 @@ setChats(prev =>
     };
   })
 );
-
-
-      // setChats(prev => {
-      //   return prev.map(chat => {
-      //     const lastMessage = messages.find(msg => msg.chat === chat.lastMessage?._id)
-      //     return lastMessage ? { ...chat, lastMessage: {...lastMessage, status : CONST.READ}} : chat
-      //   })
-      // })
 		} catch {
 			toast({ description: 'Cannot read messages', variant: 'destructive' })
 		}
 	}
+
+  const onReaction = async (reaction: string, messageId: string) => {
+		const token = await generateToken(session?.currentUser)
+		try {
+			const { data } = await apiClient.put<{ result: IMessage }>(
+				'/message/add-reaction',
+				{ reaction, messageId },
+				{ headers: { Authorization: `Bearer ${token}` } }
+			)
+			setMessages(prev =>
+				prev.map(item => (item._id === data.result._id ? { ...item, reactions: data.result.reactions } : item))
+			)
+			socket.current?.emit('updateMessage', {
+				updatedMessage: data.result,
+				receiver: currentChatUser,
+				sender: session?.currentUser,
+			})
+		} catch {
+			toast({ description: 'Cannot react to message', variant: 'destructive' })
+		}
+	}
+
+   const onDeleteMessage = async (messageId: string) => {
+		const token = await generateToken(session?.currentUser)
+		try {
+			const { data } = await apiClient.delete<{ deletedMessage: IMessage }>(
+				`/message/delete-message/` + messageId,
+	
+			{ headers: { Authorization: `Bearer ${token}` } }
+			)
+      const filteredMessages = messages.filter(item => item._id !== data.deletedMessage._id);
+      setMessages (filteredMessages)
+      const lastMessage = filteredMessages.length ? filteredMessages[filteredMessages.length - 1] : null;
+    setChats(prev =>
+  prev.map(item =>
+    item._id === currentChatId
+      ? ({
+          ...item,
+          lastMessage:
+            item.lastMessage && item.lastMessage._id === messageId
+              ? lastMessage // your new value
+              : item.lastMessage
+        } as IChat)
+      : item
+  )
+);
+      socket.current?.emit('deleteMessage', {
+        deletedMessage: data.deletedMessage,
+        receiver: currentChatUser,
+        sender: session?.currentUser,
+        filteredMessages
+      })
+
+    
+
+      // setChats(prev =>
+      //   prev.map(chat =>
+      //     chat._id === currentChatId
+      //       ? {
+      //           ...chat,
+      //           lastMessage:
+      //             chat.lastMessage?._id === messageId
+      //               ? null
+      //               : chat.lastMessage,
+      //         }
+      //       : chat
+      //   )
+      // )   
+
+		} catch {
+			toast({ description: 'Cannot react to message', variant: 'destructive' })
+		}
+	}
+
+
+  const onSubmitMessage = async (values: z.infer<typeof messageSchema>) => {
+		setCreating(true)
+		if (editedMessage) {
+			onEditMessage(editedMessage._id, values.text)
+		} else {
+			onSendMessage(values)
+		}
+	}
+
+    const onSendMessage = async (values: z.infer<typeof messageSchema>) => {
+    setCreating(true)
+    const token = await generateToken(session?.currentUser)
+    try {
+      const { data } = await apiClient.post<GetSocketType>(
+        "/message/send-msg",
+        { ...values, receiver: currentChatUser?._id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+  setMessages(prev => {
+  const exists = prev.some(m => m._id === data.message._id);
+  if (exists) return prev;
+
+  return [...prev, data.message];
+});
+
+
+await getChats()
+setChats((prev) =>
+        prev.map((chat) =>
+          chat.participants.some((u) => u._id === currentChatUser?._id)
+            ? { ...chat, lastMessage: {...data.message} }
+            : chat
+        )
+      ) 
+       socket.current?.emit("sendMessage", {
+        message: data.message,
+        receiver: data.receiver,
+        sender: data.sender,
+      })
+
+      messageForm.reset()
+      socket.current?.emit("newChatCreated", {
+        message: data.message,
+        receiver: data.receiver,
+        sender: data.sender,
+      })
+
+     
+    } catch {
+      toast({ description: "Failed to send message", variant: "destructive" })
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const onEditMessage = async (messageId: string, text : string) => {
+		const token = await generateToken(session?.currentUser)
+		try {
+			const { data } = await apiClient.put<{ updatedMessage: IMessage }>(
+				'/message/edit-message',
+				{ messageId, text },
+				{ headers: { Authorization: `Bearer ${token}` } }
+			)
+			setMessages(prev =>
+				prev.map(item => (item._id === data.updatedMessage._id ? { ...item, text: data.updatedMessage.text } : item))
+			)
+
+      socket.current?.emit('updateMessage', {
+				updatedMessage: data.updatedMessage,
+				receiver: currentChatUser,
+				sender: session?.currentUser,
+			})
+
+      setChats(prev => prev.map(item =>(
+        item._id === currentChatId ? { ...item, lastMessage: item.lastMessage?._id === data.updatedMessage._id ? data.updatedMessage : item.lastMessage } : item
+      )))
+
+        messageForm.reset()
+			// socket.current?.emit('updateMessage', {
+			// 	updatedMessage: data.result,
+			// 	receiver: currentChatUser,
+			// 	sender: session?.currentUser,
+			// })
+
+      setEditedMessage(null)
+		} catch {
+			toast({ description: 'Cannot react to message', variant: 'destructive' })
+		}
+	}
+
+ const onTyping = (e: ChangeEvent<HTMLInputElement>) => {
+
+		socket.current?.emit('typing', { receiver: currentChatUser, sender: session?.currentUser, message: e.target.value })
+	}
+
+   const createDM = async (userId: string) => {
+  const token = await generateToken(session?.currentUser);
+  try {
+    const { data } = await apiClient.post<IChat>(
+      '/chat/create-dm',
+      { userId },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const chat = data // assign chat here
+     setMessages([])
+    // update local state
+    setChats((prev) => {
+      if (prev.some((c) => c._id === chat._id)) return prev;
+      return [...prev, chat];
+    });
+    
+
+    return chat; // return the chat object
+
+  } catch (err) {
+    toast({ description: 'Cannot create chat', variant: 'destructive' });
+    return undefined; // handle failure
+  }
+};
+
 
   // 🔹 RENDER
   return (
@@ -384,7 +602,7 @@ setChats(prev =>
           ) : selectedOption === "chats" ? (
             <Chats chats={chats} setAllMessages={setAllMessages} allMessages={allMessages} />
           ) : selectedOption === "contacts" ? (
-            <Contacts contacts={contacts} />
+            <Contacts createDM={createDM} contacts={contacts} />
           ) : (
             selectedOption === "settings" && <Settings />
           )}
@@ -396,7 +614,8 @@ setChats(prev =>
       <div className="pl-[350px]">
         {!currentChatUser?._id && <AddContact />}
         {currentChatUser?._id && (
-          <Chat messageForm={messageForm} messages={messages} onSendMessage={onSendMessage} onReadMessages={onReadMessages}/>
+          <Chat onTyping={onTyping} onReaction={onReaction} messageForm={messageForm} messages={messages} 
+          onSubmitMessage={onSubmitMessage} onReadMessages={onReadMessages} onDeleteMessage={onDeleteMessage}/>
         )}
       </div>
     </div>

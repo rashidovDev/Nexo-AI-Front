@@ -5,6 +5,7 @@ import React, { FC } from 'react'
 import {format} from "date-fns"
 import { CONST } from '@/lib/constants'
 import { Check, CheckCheck, Delete, Edit, Trash } from 'lucide-react'
+import { sliceText } from '@/lib/utils'
 
 import {
   ContextMenu,
@@ -13,15 +14,22 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
 import { ContextMenuSeparator } from '@/components/ui/context-menu'
+import Image from 'next/image'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { useSession } from 'next-auth/react'
+import { useSelectedOption } from '@/services/current-option'
 
 
 interface Props {
     message  : IMessage
+    onReaction: (reaction: string, messageId: string) => Promise<void>
+      onDeleteMessage: (messageId: string) => Promise<void>
 }
 
-const MessageCard : FC <Props> = ({message}) => {
+const MessageCard : FC <Props> = ({message, onReaction, onDeleteMessage}) => {
 
-
+    const {data : session} = useSession()
+    	const { setEditedMessage } = useSelectedOption()
   	const reactions = ['👍', '😂', '❤️', '😍', '👎']
 
 
@@ -30,16 +38,40 @@ const MessageCard : FC <Props> = ({message}) => {
     <ContextMenu>
   <ContextMenuTrigger asChild>
     <div className={cn('m-2.5 font-medium text-xs flex ', message?.sender === currentChatUser?._id  ? 'justify-start' : 'justify-end')}>
-      <div className={cn('relative inline p-2 pl-2.5 pr-12 max-w-full rounded-lg', message?.sender === currentChatUser?._id ? 'bg-primary' : 'bg-secondary')}>
+      <div className={cn('relative inline p-2 pl-2.5 pr-12 max-w-full rounded-lg ', message?.sender === currentChatUser?._id ? 'bg-primary' : 'bg-secondary')}>
            <p className='text-sm text-white ' > {message?.text}</p>
+           <div className='flex items-center justify-between '>
+
            <div className='right-1 bottom-0 absolute opacity-60 text-[9px] flex gap-[3px]'>
 							<p className=''>{format(message.updatedAt, 'hh:mm')}</p>
     
 							<div className='self-end'>
 								{message.sender !== currentChatUser?._id &&
 									(message.status === CONST.READ ? <CheckCheck size={12} /> : <Check size={12}/>)}
-							</div>
+							</div>       
 						</div>
+
+            {message?.reactions && ( 
+              message.reactions.length > 0) && ( message.reactions.map((reaction) => (
+              <div key={reaction._id} onClick = {() => {
+              if(reaction.user._id === session?.currentUser?._id){
+              onReaction('', message._id) 
+                }
+             return
+              } } 
+              className='cursor-pointer mr-1  p-1 w-[50px] h-[30px] bg-white rounded-lg flex items-center justify-between mt-1'>
+                <span>{reaction.reaction}</span>   
+                <Avatar className='w-5 h-5'>
+                  <AvatarImage src={reaction.user.userImage?.url} className='object-cover'/>
+                  <AvatarFallback className='uppercase'>{reaction.user?.firstName}</AvatarFallback>
+                </Avatar>
+              </div>
+              ))
+            )}
+            
+             </div>
+            
+      {/* <span className={cn(`absolute `,  message?.sender === currentChatUser?._id ?  '-right-2' : '-left-2')}>❤️</span> */}
       </div>
     </div>
   </ContextMenuTrigger>
@@ -47,7 +79,7 @@ const MessageCard : FC <Props> = ({message}) => {
     <div className='flex items-center  justify-center'>
 
     {reactions.map((reaction) => (
-      <ContextMenuItem key={reaction} className='text-lg cursor-pointer'>
+      <ContextMenuItem onClick={() => onReaction(reaction,message._id )} key={reaction} className='text-lg cursor-pointer'>
         {reaction}
       </ContextMenuItem>
     ))}
@@ -57,12 +89,12 @@ const MessageCard : FC <Props> = ({message}) => {
          <ContextMenuSeparator />
        
         
-         <ContextMenuItem className='cursor-pointer'>
+         <ContextMenuItem onClick={() => setEditedMessage(message)} className='cursor-pointer'>
            <Edit size={14} className='mr-2' />
            <span>Edit</span> 
          </ContextMenuItem>
              <ContextMenuSeparator className=''/>
-             <ContextMenuItem className='text-red-500  cursor-pointer '>
+             <ContextMenuItem onClick={() => onDeleteMessage(message._id)} className='text-red-500  cursor-pointer '>
            <Trash size={14} className='mr-2' />
            <span>Delete</span> 
          </ContextMenuItem>

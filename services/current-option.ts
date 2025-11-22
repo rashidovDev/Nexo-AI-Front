@@ -1,3 +1,4 @@
+import { IMessage } from "@/types";
 import { create } from "zustand";
 
 interface State {
@@ -7,6 +8,8 @@ interface State {
     setSelectChatType : (type : 'all' | 'unread' | 'groups' | 'private') => void
     selectedOption: "chats" | "contacts" | "settings";
     setSelectedOption: (option: "chats" | "contacts" | "settings") => void;
+    editedMessage : IMessage | null;
+    setEditedMessage : (message : IMessage | null) => void;
 }
 
 export const useSelectedOption = create<State>((set) => ({
@@ -16,4 +19,6 @@ export const useSelectedOption = create<State>((set) => ({
   setSelectChatType: (type) => set({ selectChatType : type }),
   selectedOption: "chats", // default value
   setSelectedOption: (option) => set({ selectedOption: option }),
+  editedMessage: null,
+  setEditedMessage: (message) => set({ editedMessage: message }),
 }));

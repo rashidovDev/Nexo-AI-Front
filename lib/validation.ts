@@ -16,7 +16,6 @@ export const contactSchema = z.object({
   username: z.string().min(2, "Name must be at least 2 characters").max(30,"Name must be at most 50 characters").optional(),
 }).merge(emailSchema)
 
-
 export const messageSchema = z.object({
   text: z.string().min(1, "Message can not be empty"),
   image : z.string().optional()

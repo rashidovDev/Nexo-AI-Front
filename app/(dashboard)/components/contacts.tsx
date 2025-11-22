@@ -7,29 +7,45 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { IContact, IUser } from '@/types'
+import { IChat, IContact, IUser } from '@/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useRouter } from 'next/navigation'
 import { useCurrentChatUser } from '@/services/current-chat'
 import { useAuthStore } from '@/services/use-auth'
+import { messageSchema } from '@/lib/validation'
+import z from 'zod'
+import { useSelectedOption } from '@/services/current-option'
 
 interface Props {
     contacts : IUser[]
+    createDM: ( userId: string) => Promise<IChat | undefined>
 }
 
-const Contacts : FC <Props> = ({contacts}) => {
+const Contacts : FC <Props> = ({contacts, createDM}) => {
+    const {setSelectedOption} = useSelectedOption()
 
-  const {currentChatUser, setCurrentChatUser} = useCurrentChatUser()
+  const {currentChatUser, setCurrentChatUser, setCurrentChatId} = useCurrentChatUser()
   const router = useRouter()
   const {onlineUsers} = useAuthStore()
-  console.log('online users in contacts component', onlineUsers)
 
-  const selectChat = (chat : IUser) => {
-        console.log('chat selected', chat._id)
-        if(currentChatUser?._id === chat._id) return;
-        setCurrentChatUser(chat)
-       router.push(`/?chat=${chat._id}`)
-    }
+ const selectChat = async (contact: IUser) => {
+  // If already current chat, do nothing
+  if (currentChatUser?._id === contact._id) return;
+
+  // Create or fetch the DM
+  const chat = await createDM(contact._id.toString());
+  if (!chat) return; // stop if failed
+
+  // Set current chat user
+  setCurrentChatUser(contact);
+
+  // Navigate to chat
+  router.push(`/?chat=${chat._id}`);
+   setCurrentChatId(chat._id);
+  setSelectedOption('chats');
+ 
+};
+
 
   return (
   <div 

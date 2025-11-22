@@ -18,8 +18,6 @@ const Header = () => {
 
   const {selectedOption} = useSelectedOption()
   const { setOpenAddContactDialog} = useDialog()
-
-  
   
   return (
   <div className='mb-2 p-1'>

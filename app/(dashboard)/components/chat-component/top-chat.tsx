@@ -20,11 +20,13 @@ import { useAuthStore } from '@/services/use-auth'
 import { generateToken } from '@/lib/generate-token'
 import { useSession } from 'next-auth/react'
 import { DELETE } from '@/api/axios'
+import { useLoading } from '@/services/use-loading'
 
 const TopChat = () => {
 	const [open, setOpen] = useState<boolean>(false)
 
     const { currentChatUser } = useCurrentChatUser()
+	const {typing} = useLoading()
 	
 	const {onlineUsers} = useAuthStore()
 	const {data : session, update} =  useSession()
@@ -52,33 +54,35 @@ const TopChat = () => {
   setOpen(false)
  }
 
+ console.log("Typing info in TopChat:", typing.message)
+
   return (
     <div className='w-full flex items-center justify-between sticky top-0 z-50 h-[6vh] p-2 border-b bg-background'>
         <div className='flex items-center'>
             <Avatar className='z-40'>
 					<AvatarImage src={currentChatUser?.userImage?.url} alt={currentChatUser?.email} className='object-cover' />
-					<AvatarFallback className='uppercase'>{currentChatUser?.email[0]}</AvatarFallback>
+					<AvatarFallback className='uppercase'>{currentChatUser?.email}</AvatarFallback>
 				</Avatar>
                 <div className='ml-2'>
                     <h2 className='font-medium text-sm'>{currentChatUser?.email}</h2>
                     {/* TYPING */}
-                    {/* <div className='text-xs flex items-center gap-1 text-muted-foreground'>
-									<p className='text-secondary-foreground animate-pulse line-clamp-1'>Typing</p>
-									<div className='self-end mb-1'>
+					{typing.message ? (
+<div className='text-xs flex items-center gap-1 text-muted-foreground'>
+									
+									<div className='self-end mb-1 '>
 										<div className='flex justify-center items-center gap-1'>
-											<div className='w-1 h-1 bg-secondary-foreground rounded-full animate-bounce [animation-delay:-0.3s]'></div>
-											<div className='w-1 h-1 bg-secondary-foreground rounded-full animate-bounce [animation-delay:-0.10s]'></div>
-											<div className='w-1 h-1 bg-secondary-foreground rounded-full animate-bounce [animation-delay:-0.15s]'></div>
+											<div className='w-1 bg-blue-600 h-1 bg-secondary-foreground rounded-full animate-bounce [animation-delay:-0.3s]'></div>
+											<div className='w-1 bg-blue-600 h-1  bg-secondary-foreground rounded-full animate-bounce [animation-delay:-0.10s]'></div>
+											<div className='w-1 bg-blue-600 h-1 bg-secondary-foreground rounded-full animate-bounce [animation-delay:-0.15s]'></div>
 										</div>
 									</div>
-								</div> */}
-                   <p className='text-xs'>
-									
-										{/* <>
-											<span className='text-green-500'>●</span> Online
-										</> */}
-									
-										<>
+									<p className='text-blue-500  animate-pulse line-clamp-1 ml-[2px]'>typing</p>
+								</div>
+					)
+				:
+				(
+					 <p className='text-xs'>							
+					<>
 										{onlineUsers.some(user => user?._id === currentChatUser?._id) ? (
 											<span className='text-green-500'>Online</span>
 										) : (
@@ -87,6 +91,7 @@ const TopChat = () => {
 										</>
 								
 								</p>
+				)}
                      {/* ONLINE */}
                 </div>
         </div>
@@ -103,7 +108,7 @@ const TopChat = () => {
 	<div className='mx-auto w-1/2 max-md:w-1/4 h-36 relative'>
 						<Avatar className='w-36 h-36 mx-auto'>
 							<AvatarImage src={currentChatUser?.userImage?.url} alt={currentChatUser?.email} className='object-cover' />
-							<AvatarFallback className='text-6xl uppercase font-spaceGrotesk'>{currentChatUser?.email[0]}</AvatarFallback>
+							<AvatarFallback className='text-6xl uppercase font-spaceGrotesk'>{currentChatUser?.email}</AvatarFallback>
 						</Avatar>
 					</div>
 					<Separator className='my-2' />

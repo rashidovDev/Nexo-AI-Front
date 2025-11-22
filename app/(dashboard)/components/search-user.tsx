@@ -26,7 +26,7 @@ const { data: session } =  useSession()
     const token = await generateToken(session?.currentUser)
     const { data } = await apiClient.get(`/user?search=${searchQuery}`, { headers: { Authorization: `Bearer ${token}` } })
     setUserData(data)
-    console.log("SEARCH DATA",data)
+
     return data
      } catch (error) {
       return null

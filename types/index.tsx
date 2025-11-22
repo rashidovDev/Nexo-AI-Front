@@ -52,10 +52,30 @@ userImage?: {
 
 export interface IMessage {
 	_id: string
-    chat: string | ObjectId
+    chat: IChat | string | ObjectId 
 	text: string
 	image: string
-	reaction: string
+	reactions: {
+        _id?: string;
+    reaction: string;                        // emoji or reaction type
+    user: IUser;                            // userId (ObjectId as string)
+  }[];
+	  sender: IUser | string | ObjectId
+  receiver: IUser | string | ObjectId
+	createdAt: string
+	updatedAt: string
+	status: string
+}
+export interface IMsgChat {
+	_id: string
+    chat: IChat
+	text: string
+	image: string
+	reactions: {
+        _id?: string;
+    reaction: string;                        // emoji or reaction type
+    user: IUser;                            // userId (ObjectId as string)
+  }[];
 	  sender: IUser | string | ObjectId
   receiver: IUser | string | ObjectId
 	createdAt: string
@@ -63,12 +83,38 @@ export interface IMessage {
 	status: string
 }
 
+export interface IMessageChat {
+	_id: string
+    chat: IChat 
+	text: string
+// 	image: string
+// 	reactions: {
+//         _id?: string;
+//     reaction: string;                        // emoji or reaction type
+//     user: IUser;                            // userId (ObjectId as string)
+//   }[];
+	  sender: IUser | string | ObjectId
+//   receiver: IUser | string | ObjectId
+// 	createdAt: string
+// 	updatedAt: string
+// 	status: string
+}
+
 
 export interface IChat {
   _id: string;                // MongoDB document ID
   name?: string;              // for group chats
-  isGroup: boolean;
+  isGroup?: boolean;
   participants: IUser[];     // user IDs
   admins: string[];           // subset of participants (for groups)
   lastMessage?: IMessage;       // message ID or populated message
 }
+// export interface IChat {
+//   _id: string;   
+//   name ? : string;              // chat ID
+//   isGroup: boolean;            // false for 1-on-1 chat
+//   participants: IUser[];       // array of users
+//   admins: IUser[];             // array of admins (empty for 1-on-1)
+//   __v: number;
+//   lastMessage: string | IMessage; // ID of last message (or full message)
+// }

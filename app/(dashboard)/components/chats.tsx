@@ -20,14 +20,13 @@ interface Props {
 
 const Chats : FC <Props> = ({chats, allMessages, setAllMessages}) => {
 
+
   const {onlineUsers} = useAuthStore()
 const {data : session} = useSession()
-const {currentChatUser, setCurrentChatUser, setCurrentChatId} = useCurrentChatUser()
+const {currentChatUser, setCurrentChatUser, setCurrentChatId , currentChatId} = useCurrentChatUser()
 const router = useRouter()
 
 let statusIcon: JSX.Element | null = null;
-
-console.log("ONLINE USERS IN CHATS COMPONENT", onlineUsers);
 
 
 const renderContact = (chat : IChat) => {
@@ -47,12 +46,15 @@ if (!chat?.isGroup) {
     (p) => p._id !== session?.currentUser?._id
   );
 }
+
+
     const selectChat = () => {
         // console.log('chat selected', chat._id)
         // if(currentChatUser?._id === chat._id) return;
         if (!otherUser) return;
         setCurrentChatUser(otherUser)
         setCurrentChatId(chat._id)
+
        const chatMessages = allMessages.filter(m => m.chat?.toString() === chat._id.toString());
        setAllMessages(chatMessages);
       
@@ -69,7 +71,7 @@ if (!chat?.isGroup) {
   
 
         <div  onClick={selectChat} key={String(chat?._id)} className={cn(`flex items-center justify-between border-b  
-        cursor-pointer p-3 relative`, currentChatUser?._id === chat?._id && 'bg-primary text-white' )  }>
+        cursor-pointer p-3 relative`, currentChatId == chat?._id && 'bg-primary text-white' )  }>
         
             <div className='flex items-center gap-2'>
             <div className='relative'>
@@ -84,7 +86,7 @@ if (!chat?.isGroup) {
             </div>
             <div className='relative '>
     <h2 className='capitalize line-clamp-1 text-sm'>{otherUser?.firstName ? otherUser?.firstName : '.'} {otherUser?.lastName}</h2>
-    <p className='text-xs  dark:text-muted-foreground '>{chat?.lastMessage ? `${sliceText(chat?.lastMessage?.text, 25) }` :  "No messages yet"} </p>
+    <p className='text-xs  '>{chat?.lastMessage ? `${sliceText(chat?.lastMessage?.text, 25) }` :  "No messages yet"} </p>
     
 </div>
             </div>

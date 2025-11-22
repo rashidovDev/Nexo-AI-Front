@@ -17,21 +17,36 @@ import {
 } from "@/components/ui/popover"
 import { useTheme } from 'next-themes'
 import { IMessage } from '@/types'
+import { useSelectedOption } from '@/services/current-option'
 
 interface Props {
-  onSendMessage : (value : z.infer <typeof messageSchema>) => void
+  onSubmitMessage : (value : z.infer <typeof messageSchema>) => void
   onReadMessages: () => Promise<void>
   messageForm : UseFormReturn<z.infer <typeof messageSchema>>
   messages : IMessage[]
+  onTyping : (e : React.ChangeEvent<HTMLInputElement>) => void
+  onReaction: (reaction: string, messageId: string) => Promise<void>
+  onDeleteMessage: (messageId: string) => Promise<void>
 }
 
-const Chat :FC<Props> = ({onSendMessage, messageForm, messages, onReadMessages}) => {
+const Chat :FC<Props> = ({onSubmitMessage, messageForm, messages, onReadMessages, onReaction, onDeleteMessage, onTyping}) => {
+  
+  
   const {resolvedTheme} = useTheme() 
   const inputRef = useRef<HTMLInputElement | null >(null)
+  const { editedMessage, setEditedMessage } = useSelectedOption()
+  const scrollRef = useRef<HTMLFormElement | null>(null)
 
   useEffect(() => {
   onReadMessages()
   },[messages])
+
+ useEffect(() => {
+		if (editedMessage) {
+			messageForm.setValue('text', editedMessage.text)
+			scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+		}
+	}, [editedMessage]) 
 
 	const handleEmojiSelect = (emoji: string) => {
 		const input = inputRef.current
@@ -55,7 +70,7 @@ const Chat :FC<Props> = ({onSendMessage, messageForm, messages, onReadMessages})
      <TopChat/>
 
      {/* MESSAGES  h-90vh */}
-     <ChatMessage messages={messages} onSendMessage={onSendMessage}/> 
+     <ChatMessage   onReaction={onReaction} messages={messages} onSubmitMessage={onSubmitMessage} onDeleteMessage={onDeleteMessage}/> 
 
        {/* <div className='w-full h-[88vh] flex items-center justify-center'>
 					<div className='text-[100px] cursor-pointer' onClick={() => onSubmitMessage({ text: '✋' })}>
@@ -68,7 +83,7 @@ const Chat :FC<Props> = ({onSendMessage, messageForm, messages, onReadMessages})
    <div className='h-[5vh]'>
   <Form {...messageForm}>
     <form
-      onSubmit={messageForm.handleSubmit(onSendMessage)}
+      onSubmit={messageForm.handleSubmit(onSubmitMessage)}
       className='w-full h-full flex'
     >
       <Button
@@ -92,12 +107,12 @@ const Chat :FC<Props> = ({onSendMessage, messageForm, messages, onReadMessages})
                 placeholder='Type a message'
                 value={field.value}
                 onBlur={() => field.onBlur()}
-         onChange={e => {
+                  onChange={e => {
 											field.onChange(e.target.value)
-											// onTyping(e)
-											// if (e.target.value === '') setEditedMessage(null)
+											onTyping(e)
+											if (e.target.value === '') setEditedMessage(null)
 										}}
-                ref = {inputRef}
+                      ref = {inputRef}
               />
             
             </FormControl>

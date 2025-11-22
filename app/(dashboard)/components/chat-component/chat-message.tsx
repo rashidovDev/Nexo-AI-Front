@@ -9,10 +9,12 @@ import { useRef, useEffect } from 'react'
 
 interface Props {
   messages : IMessage[]
-  onSendMessage : (value : z.infer <typeof messageSchema>) => void
+  onSubmitMessage : (value : z.infer <typeof messageSchema>) => void
+  onReaction: (reaction: string, messageId: string) => Promise<void>
+  onDeleteMessage: (messageId: string) => Promise<void>
 }
 
-const ChatMessage : FC <Props> = ({messages, onSendMessage}) => {
+const ChatMessage : FC <Props> = ({messages, onSubmitMessage, onReaction, onDeleteMessage}) => {
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
@@ -27,13 +29,13 @@ const ChatMessage : FC <Props> = ({messages, onSendMessage}) => {
 
         {loadMessages ? <ChatLoading/> :
         	messages?.map((message, index) => (
-				<MessageCard key={index} message={message} />
+				<MessageCard  onReaction={onReaction} key={index} message={message} onDeleteMessage={onDeleteMessage}/>
 			))}
 
 			{/* Start conversation */}
 			{messages?.length === 0 && (
 				<div className='w-full h-[88vh] flex items-center justify-center'>
-					<div onClick={() => onSendMessage({ text: '✋' })} className='text-[100px] cursor-pointer' >
+					<div onClick={() => onSubmitMessage({ text: '✋' })} className='text-[100px] cursor-pointer' >
 						✋
 					</div>
 				</div>
