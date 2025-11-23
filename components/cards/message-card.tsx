@@ -29,6 +29,7 @@ interface Props {
 const MessageCard : FC <Props> = ({message, onReaction, onDeleteMessage}) => {
 
     const {data : session} = useSession()
+    
     	const { setEditedMessage } = useSelectedOption()
   	const reactions = ['👍', '😂', '❤️', '😍', '👎']
 
@@ -39,7 +40,15 @@ const MessageCard : FC <Props> = ({message, onReaction, onDeleteMessage}) => {
   <ContextMenuTrigger asChild>
     <div className={cn('m-2.5 font-medium text-xs flex ', message?.sender === currentChatUser?._id  ? 'justify-start' : 'justify-end')}>
       <div className={cn('relative inline p-2 pl-2.5 pr-12 max-w-full rounded-lg ', message?.sender === currentChatUser?._id ? 'bg-primary' : 'bg-secondary')}>
-           <p className='text-sm text-white ' > {message?.text}</p>
+       {message?.image ? (
+    <div className='w-[200px]'>
+
+      <Image src={message?.image} alt={message?.image} width={201} height={150} className='rounded-lg object-cover mx-auto'/>
+    </div>
+       ): (
+ <p className='text-sm text-white ' > {message?.text}</p>
+       )}
+          
            <div className='flex items-center justify-between '>
 
            <div className='right-1 bottom-0 absolute opacity-60 text-[9px] flex gap-[3px]'>

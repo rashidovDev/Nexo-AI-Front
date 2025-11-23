@@ -7,7 +7,7 @@ import { toast } from '@/hooks/use-toast'
 import { generateToken } from '@/lib/generate-token'
 import { connectToDatabase } from '@/lib/mongoose'
 import { useSelectedOption } from '@/services/current-option'
-import { useDialog } from '@/services/use-dialog'
+import { useModal } from '@/services/use-modal'
 import { IUser } from '@/types'
 import { Search, SquarePen } from 'lucide-react'
 import { useSession } from 'next-auth/react'
@@ -17,14 +17,14 @@ const Header = () => {
    const {searchQuery, setSearchQuery} = useSelectedOption()
 
   const {selectedOption} = useSelectedOption()
-  const { setOpenAddContactDialog} = useDialog()
+  const { setOpenAddContactModal} = useModal()
   
   return (
   <div className='mb-2 p-1'>
           <div className='mb-1 flex justify-between items-center '>
             <ModeToggle/>
            <h1 className='capitalize text-center text-lg'>{selectedOption}</h1>
-           <SquarePen onClick={() => setOpenAddContactDialog(true)} className='cursor-pointer mr-2' size={15}/>
+           <SquarePen onClick={() => setOpenAddContactModal(true)} className='cursor-pointer mr-2' size={15}/>
           </div>
          {/* SEARCH */}
         <div className="relative w-[95%] mx-auto">

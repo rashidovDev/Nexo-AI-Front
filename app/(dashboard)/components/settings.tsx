@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from '@/hooks/use-toast'
 import { generateToken } from '@/lib/generate-token'
 import { useMutation } from '@tanstack/react-query'
-import { Camera, Delete, LogIn, Moon, Plus, Sun, Trash, VolumeOff } from 'lucide-react'
+import { Camera, Delete, LogIn, Moon, Plus, Sun, Trash, Upload, VolumeOff } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 import { useTheme } from 'next-themes'
 import React, { useEffect, useState } from 'react'
@@ -33,6 +33,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { UploadButton, UploadDropzone } from '@/lib/uploadthing'
 
 
 const Settings = () => {
@@ -106,6 +107,20 @@ const Settings = () => {
           <p className='text-[12px] text-muted-foreground'>{session?.currentUser?.email}</p>
             </div>
      </div>
+
+      {/* <UploadButton
+      endpoint="imageUploader"
+
+      onClientUploadComplete={(res) => {
+        console.log("Upload success:", res)
+      }}
+      config={{ appendOnPaste: true, mode: 'auto' }}
+      appearance={{ allowedContent: { display: 'none' }, button: { width: 40, height: 40, borderRadius: '100%' } }}
+      	content={{ button: <Upload size={16} /> }}
+      onUploadError={(err) => {
+        alert("Upload error: " + err.message)
+      }}
+    /> */}
 
 
      <div className='flex justify-between items-center p-2 hover:bg-secondary rounded-md  my-2'>

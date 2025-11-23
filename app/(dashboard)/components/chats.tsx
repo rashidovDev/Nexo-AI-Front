@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {format} from "date-fns"
 import { CONST } from '@/lib/constants'
 import { count } from 'console'
-import { Check, CheckCheck } from 'lucide-react'
+import { Check, CheckCheck, Image } from 'lucide-react'
 import { useAuthStore } from '@/services/use-auth'
 
 interface Props {
@@ -86,7 +86,13 @@ if (!chat?.isGroup) {
             </div>
             <div className='relative '>
     <h2 className='capitalize line-clamp-1 text-sm'>{otherUser?.firstName ? otherUser?.firstName : '.'} {otherUser?.lastName}</h2>
-    <p className='text-xs  '>{chat?.lastMessage ? `${sliceText(chat?.lastMessage?.text, 25) }` :  "No messages yet"} </p>
+    {chat?.lastMessage?.image ? (
+      <div className='text-[13px] flex items-center text-blue-700'><span> Image</span> <span className='ml-1'><Image  size={14}/></span></div>
+    ) :
+    (
+   <p className='text-xs  '>{chat?.lastMessage ? `${sliceText(chat?.lastMessage?.text, 25) }` :  "No messages yet"} </p>
+    )}
+    
     
 </div>
             </div>

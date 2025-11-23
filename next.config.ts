@@ -10,9 +10,16 @@ const nextConfig: NextConfig = {
     hostname: 'avatars.githubusercontent.com',
     port: '',
     pathname: '/u/**'
-   }
+   },
+   {
+    protocol: 'https',
+    hostname: 'utfs.io',
+    port: '',
+    pathname: '/u/**'
+   },
+
     ],
-    domains: ['lh3.googleusercontent.com', 'avatars.githubusercontent.com'],
+    domains: ['lh3.googleusercontent.com', 'avatars.githubusercontent.com', 'utfs.io'],
   },
 };
 

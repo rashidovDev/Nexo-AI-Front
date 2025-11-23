@@ -17,8 +17,8 @@ import { useSelectedOption } from "@/services/current-option"
 import Contacts from "./components/contacts"
 import Settings from "./components/settings"
 import { IChat, IMessage, IMessageChat, IMsgChat, IUser } from "@/types"
-import AddContactCard from "@/components/cards/add-contact-card"
-import { useDialog } from "@/services/use-dialog"
+// import AddContactCard from "@/components/cards/add-contact-card"
+import { useModal } from "@/services/use-modal"
 import { useLoading } from "@/services/use-loading"
 import { generateToken } from "@/lib/generate-token"
 import { useSession } from "next-auth/react"
@@ -30,6 +30,8 @@ import { useAuthStore } from "@/services/use-auth"
 import useAudio from "@/services/use-audio"
 import { CONST } from "@/lib/constants"
 import { set } from "mongoose"
+import ModalAddContact from "@/components/Modals/add-contact-modal"
+import ModalUploadFile from "@/components/Modals/upload-file-modal"
 
 interface GetSocketType {
   receiver: IUser
@@ -48,7 +50,7 @@ const Home = () => {
   const { setCreating, setLoadMessages, setTyping } = useLoading()
   const { currentChatUser, currentChatId } = useCurrentChatUser()
   const { selectedOption, searchQuery, editedMessage, setEditedMessage } = useSelectedOption()
-  const { openAddContactDialog } = useDialog()
+  const { openAddContactModal } = useModal()
   const { setOnlineUsers } = useAuthStore()
   const { playSound } = useAudio()
   const { data: session, update } = useSession()
@@ -584,10 +586,9 @@ setChats((prev) =>
   // 🔹 RENDER
   return (
     <div>
-      <div className="w-[300px] mx-auto">
-        {openAddContactDialog && (
-          <AddContactCard contactForm={contactForm} onCreateContact={onCreateContact} />
-        )}
+      <div className="">
+          <ModalAddContact contactForm={contactForm} onCreateContact={onCreateContact}/>
+          <ModalUploadFile onSubmitMessage={onSubmitMessage}/>
       </div>
 
       <div className="fixed inset-0 w-[350px] h-screen z-50 border-r flex">

@@ -3,13 +3,13 @@ import React, { FC } from 'react'
 import { Button } from '@/components/ui/button'
 import { LuMessagesSquare } from 'react-icons/lu'
 import { UserPlus } from 'lucide-react';
-import { useDialog } from '@/services/use-dialog'
+import { useModal } from '@/services/use-modal'
 
 
 const AddContact : FC= () => {
-	const { setOpenAddContactDialog} = useDialog()
+	const { setOpenAddContactModal} = useModal()
   return (
-   <div className='h-screen w-full flex z-40 relative'>
+   <div className='h-screen w-full flex z-10 relative'>
 			<div className='flex justify-center items-center z-50 w-full'>
 				<div className='flex flex-col items-center gap-4'>
 					<div className='container max-w-md w-full  flex 
@@ -23,7 +23,7 @@ const AddContact : FC= () => {
            </div>
 		   
              <Button onClick={() =>{
-				setOpenAddContactDialog(true)
+				setOpenAddContactModal(true)
 			 } } type='submit' className='w-full' size={'lg'}>
 						<UserPlus size={16}/> Add Contact
 			</Button>		

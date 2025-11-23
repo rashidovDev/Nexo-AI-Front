@@ -18,6 +18,8 @@ import {
 import { useTheme } from 'next-themes'
 import { IMessage } from '@/types'
 import { useSelectedOption } from '@/services/current-option'
+import { useModal } from '@/services/use-modal'
+import { set } from 'mongoose'
 
 interface Props {
   onSubmitMessage : (value : z.infer <typeof messageSchema>) => void
@@ -30,7 +32,7 @@ interface Props {
 }
 
 const Chat :FC<Props> = ({onSubmitMessage, messageForm, messages, onReadMessages, onReaction, onDeleteMessage, onTyping}) => {
-  
+   const { setOpenUploadFileModal} = useModal()
   
   const {resolvedTheme} = useTheme() 
   const inputRef = useRef<HTMLInputElement | null >(null)
@@ -91,6 +93,7 @@ const Chat :FC<Props> = ({onSubmitMessage, messageForm, messages, onReadMessages
         type='button'
         variant={'secondary'}
         className='rounded-none h-full'
+        onClick={() => setOpenUploadFileModal(true)}
       >
         <Paperclip />
       </Button>
