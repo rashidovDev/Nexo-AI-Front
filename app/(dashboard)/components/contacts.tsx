@@ -12,9 +12,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useRouter } from 'next/navigation'
 import { useCurrentChatUser } from '@/services/current-chat'
 import { useAuthStore } from '@/services/use-auth'
-import { messageSchema } from '@/lib/validation'
-import z from 'zod'
+
 import { useSelectedOption } from '@/services/current-option'
+import { UserPlus } from 'lucide-react'
+import { useModal } from '@/services/use-modal'
 
 interface Props {
     contacts : IUser[]
@@ -23,7 +24,7 @@ interface Props {
 
 const Contacts : FC <Props> = ({contacts, createDM}) => {
     const {setSelectedOption} = useSelectedOption()
-
+  const {setOpenAddContactModal} = useModal()
   const {currentChatUser, setCurrentChatUser, setCurrentChatId} = useCurrentChatUser()
   const router = useRouter()
   const {onlineUsers} = useAuthStore()
@@ -43,14 +44,16 @@ const Contacts : FC <Props> = ({contacts, createDM}) => {
   router.push(`/?chat=${chat._id}`);
    setCurrentChatId(chat._id);
   setSelectedOption('chats');
- 
 };
-
 
   return (
   <div 
-  className="cursor-pointer">
+  className="cursor-pointer p-1">
       <div className="">
+        <div onClick={() => setOpenAddContactModal(true)} className='ml-3  border-b flex items-center cursor-pointer '>
+            <UserPlus size={18} className='text-primary mb-2'/>
+            <div className="ml-5 mb-2 text-primary">Invite Friend</div>
+          </div>
       {contacts?.length > 0 ? contacts?.map((contact) => (
         <div
           onClick={() => selectChat(contact)}

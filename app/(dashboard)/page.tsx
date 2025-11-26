@@ -5,7 +5,7 @@ import Chats from "./components/chats"
 import Header from "./components/header"
 import LeftBar from "./components/leftbar"
 import Footer from "./components/footer"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import AddContact from "./components/add-contact"
 import Chat from "./components/chat-component/chat"
 import { useCurrentChatUser } from "@/services/current-chat"
@@ -36,10 +36,14 @@ import ModalUploadFile from "@/components/Modals/upload-file-modal"
 interface GetSocketType {
   receiver: IUser
   sender: IUser
-  message: IMsgChat
+  message: IMsgChat,
+  currentChatId?: string
 }
 
 const Home = () => {
+  
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
   const router = useRouter()
   const [contacts, setContacts] = useState<IUser[]>([])
   const [messages, setMessages] = useState<IMessage[]>([])
@@ -50,11 +54,16 @@ const Home = () => {
   const { setCreating, setLoadMessages, setTyping } = useLoading()
   const { currentChatUser, currentChatId } = useCurrentChatUser()
   const { selectedOption, searchQuery, editedMessage, setEditedMessage } = useSelectedOption()
-  const { openAddContactModal } = useModal()
+  const { openAddContactModal, setOpenAddContactModal } = useModal()
   const { setOnlineUsers } = useAuthStore()
   const { playSound } = useAudio()
   const { data: session, update } = useSession()
   const { setLoading } = useLoading()
+
+  const searchParams = useSearchParams()
+
+
+  const chatId = searchParams.get("chat") || null
 
   // 🔹 SOCKET SETUP
   useEffect(() => {
@@ -152,6 +161,7 @@ const Home = () => {
 			})
 
     socket.current.on("getNewMessage", ({ message, receiver, sender }: GetSocketType) => {
+      	setTyping({ message: '', sender: null })
        setAllMessages((prev) => [...prev, message])
        
      if(currentChatId === message.chat._id.toString()) {    
@@ -177,7 +187,7 @@ const Home = () => {
     })
 
     socket.current?.on('getUpdatedMessage', ( {updatedMessage, receiver, sender}  ) => {
-				// setTyping({ message: '', sender: null })
+				setTyping({ message: '', sender: null })
 				setMessages(prev =>
 					prev.map(item =>
 						item._id === updatedMessage._id ? { ...item, reactions: updatedMessage.reactions, text: updatedMessage.text } : item
@@ -213,12 +223,11 @@ const Home = () => {
     })
 
     socket.current?.on("getTypingMessage", ({ message, sender, receiver }: { message: string; sender: IUser, receiver : IUser }) => {
-          if(receiver._id !== currentChatUser?._id){
+          if(chatId === currentChatId ){
            setTyping({ sender, message})
+          }else{
+            setTyping({ sender: null, message: ''})
           }
-
-       
-        
     })
 
     return () => {
@@ -327,6 +336,7 @@ const Home = () => {
       })
       await update()
       toast({ description: "Contact added successfully" })
+      setOpenAddContactModal(false)
       contactForm.reset()
     } catch (error: any) {
       toast({
@@ -554,7 +564,7 @@ setChats((prev) =>
 
  const onTyping = (e: ChangeEvent<HTMLInputElement>) => {
 
-		socket.current?.emit('typing', { receiver: currentChatUser, sender: session?.currentUser, message: e.target.value })
+        socket.current?.emit('typing', { receiver: currentChatUser, sender: session?.currentUser, message: e.target.value })
 	}
 
    const createDM = async (userId: string) => {
@@ -591,11 +601,14 @@ setChats((prev) =>
           <ModalUploadFile onSubmitMessage={onSubmitMessage}/>
       </div>
 
-      <div className="fixed inset-0 w-[350px] h-screen z-50 border-r flex">
-        <div className="w-[20%]">
+      <div  className={`
+    fixed inset-0 md:w-[350px] h-screen w-full md:mx-0 mx-auto z-50 border-r flex 
+    ${isMobile && currentChatUser?._id ? "hidden" : "flex"}
+  `}>
+        <div className="md:w-[20%] w-[13%]">
           <LeftBar />
         </div>
-        <div className="w-[80%] border-l relative">
+        <div className="w-[87%] mx-auto border-l relative">
           <Header />
 
           {searchQuery.trim() !== "" ? (
@@ -612,11 +625,16 @@ setChats((prev) =>
         </div>
       </div>
 
-      <div className="pl-[350px]">
-        {!currentChatUser?._id && <AddContact />}
+      <div  className={`
+    ${isMobile ? "pl-0 w-full" : "pl-[350px]"} 
+  `}>
+        {!currentChatUser?._id && <div className="hidden md:flex"><AddContact /></div> }
         {currentChatUser?._id && (
-          <Chat onTyping={onTyping} onReaction={onReaction} messageForm={messageForm} messages={messages} 
-          onSubmitMessage={onSubmitMessage} onReadMessages={onReadMessages} onDeleteMessage={onDeleteMessage}/>
+          <div className={`${isMobile ? "fixed inset-0 w-full h-full z-50" : ""}`}>
+
+            <Chat onTyping={onTyping} onReaction={onReaction} messageForm={messageForm} messages={messages} onCreateContact={onCreateContact}
+            onSubmitMessage={onSubmitMessage} onReadMessages={onReadMessages} onDeleteMessage={onDeleteMessage}/>
+          </div>
         )}
       </div>
     </div>

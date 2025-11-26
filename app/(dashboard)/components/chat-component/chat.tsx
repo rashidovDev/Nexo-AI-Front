@@ -3,7 +3,7 @@ import TopChat from './top-chat'
 import ChatMessage from './chat-message'
 import { UseFormReturn } from 'react-hook-form'
 import z from 'zod'
-import { messageSchema } from '@/lib/validation'
+import { contactSchema, messageSchema } from '@/lib/validation'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Paperclip, Send, Smile } from 'lucide-react'
@@ -29,9 +29,11 @@ interface Props {
   onTyping : (e : React.ChangeEvent<HTMLInputElement>) => void
   onReaction: (reaction: string, messageId: string) => Promise<void>
   onDeleteMessage: (messageId: string) => Promise<void>
+  onCreateContact: (values: z.infer<typeof contactSchema>) => void
 }
 
-const Chat :FC<Props> = ({onSubmitMessage, messageForm, messages, onReadMessages, onReaction, onDeleteMessage, onTyping}) => {
+const Chat :FC<Props> = ({onSubmitMessage, messageForm, messages, onReadMessages,
+   onReaction, onDeleteMessage, onTyping, onCreateContact}) => {
    const { setOpenUploadFileModal} = useModal()
   
   const {resolvedTheme} = useTheme() 
@@ -69,7 +71,7 @@ const Chat :FC<Props> = ({onSubmitMessage, messageForm, messages, onReadMessages
     <div className='w-full relative'>
      {/* TOP CHAT h-6vh */}
 
-     <TopChat/>
+     <TopChat onCreateContact={onCreateContact}/>
 
      {/* MESSAGES  h-90vh */}
      <ChatMessage   onReaction={onReaction} messages={messages} onSubmitMessage={onSubmitMessage} onDeleteMessage={onDeleteMessage}/> 

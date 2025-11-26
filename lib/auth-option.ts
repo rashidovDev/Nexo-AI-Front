@@ -20,7 +20,7 @@ export const authOptions: NextAuthOptions = {
 		GithubProvider({
 			clientId: process.env.GITHUB_CLIENT_ID!,
 			clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-		}),
+		}), 
 		GoogleProvider({
 			clientId: process.env.GOOGLE_CLIENT_ID!,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
@@ -35,7 +35,10 @@ export const authOptions: NextAuthOptions = {
 				const user = await User.create({
 					email: session.user?.email,
 					isVerified: true,
-					avatar: session.user?.image,
+					userImage: {
+                    url : session.user?.image,
+					public_id : ''
+					}
 				})
 				session.currentUser = user
 				return session

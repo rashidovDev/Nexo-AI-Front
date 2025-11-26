@@ -26,6 +26,12 @@ const {data : session} = useSession()
 const {currentChatUser, setCurrentChatUser, setCurrentChatId , currentChatId} = useCurrentChatUser()
 const router = useRouter()
 
+
+const filteredChats = chats.sort((a, b) => {
+			const dateA = a.lastMessage?.updatedAt ? new Date(a.lastMessage.updatedAt).getTime() : 0
+			const dateB = b.lastMessage?.updatedAt ? new Date(b.lastMessage.updatedAt).getTime() : 0
+			return dateB - dateA
+		})
 let statusIcon: JSX.Element | null = null;
 
 
@@ -54,6 +60,7 @@ if (!chat?.isGroup) {
         if (!otherUser) return;
         setCurrentChatUser(otherUser)
         setCurrentChatId(chat._id)
+        console.log('ALL MESSAGES BEFORE FILTER', otherUser)
 
        const chatMessages = allMessages.filter(m => m.chat?.toString() === chat._id.toString());
        setAllMessages(chatMessages);
@@ -80,9 +87,8 @@ if (!chat?.isGroup) {
   <AvatarFallback className='uppercase'>{otherUser?.firstName ?? ''}</AvatarFallback>
 </Avatar>
  {onlineUsers.some(user => user?._id === otherUser?._id) && (
-							<div className='size-3 bg-green-500 absolute rounded-full bottom-0 right-0 !z-40' />
+							<div className='size-3 bg-green-500 absolute rounded-full bottom-0 right-0' />
 						)}
-
             </div>
             <div className='relative '>
     <h2 className='capitalize line-clamp-1 text-sm'>{otherUser?.firstName ? otherUser?.firstName : '.'} {otherUser?.lastName}</h2>
@@ -118,7 +124,7 @@ if (!chat?.isGroup) {
     }
   return (
     <div className=' border-t h-[85vh] overflow-y-auto'>
-        {chats?.length == 0 ? (
+        {filteredChats?.length == 0 ? (
 
          <div  className='w-full h-[95vh] flex justify-center items-center'>
             No Chats Found

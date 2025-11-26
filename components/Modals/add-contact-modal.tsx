@@ -23,7 +23,7 @@ const ModalAddContact: React.FC <Props> = ({ contactForm, onCreateContact }) => 
   {openAddContactModal && (
     <motion.div
       key="modal-backdrop"
-      className="fixed inset-0  z-30 flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0  z-[9999] flex items-center justify-center bg-black bg-opacity-50"
       onClick={() => setOpenAddContactModal(false)}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -38,8 +38,8 @@ const ModalAddContact: React.FC <Props> = ({ contactForm, onCreateContact }) => 
         onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
         className="opacity-100   rounded-[10px] m-auto relative p- items-center justify-center flex"
       >
-        <div className=' bg-[#04080F] md:w-[500px] w-[90%] mx-auto border border-gray-700 rounded-lg p-5 z-30'>
-        <h1 className='text-lg font-semibold'>Add Contact</h1>
+        <div className=' bg-[#04080F] md:w-[500px] w-[90%] mx-auto border border-gray-700 rounded-lg p-6 '>
+        <h1 className=' font-bold text-2xl'>Add Contact</h1>
         <p className='text-sm text-left'> Fill in contact details below and submit when you're done.</p>
 
         <Form {...contactForm} >

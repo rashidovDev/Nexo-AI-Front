@@ -3,8 +3,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useCurrentChatUser } from '@/services/current-chat'
-import { Copy, Settings2 } from 'lucide-react'
-import React, { useState } from 'react'
+import { ChevronLeft, Copy, Settings2 } from 'lucide-react'
+import React, { FC, useState } from 'react'
 import {
   Sheet,
   SheetContent,
@@ -21,8 +21,26 @@ import { generateToken } from '@/lib/generate-token'
 import { useSession } from 'next-auth/react'
 import { DELETE } from '@/api/axios'
 import { useLoading } from '@/services/use-loading'
+import { contactSchema } from '@/lib/validation'
+import z from 'zod'
+import { useRouter } from 'next/navigation'
 
-const TopChat = () => {
+
+interface Props {
+  onCreateContact: (values: z.infer<typeof contactSchema>) => void
+}
+
+
+const TopChat :FC <Props> = ({onCreateContact}) => {
+
+	const {setCurrentChatUser, setCurrentChatId} = useCurrentChatUser()
+
+	  const router = useRouter();
+
+  const backToHome = () => {
+  router.replace("/");
+};
+
 	const [open, setOpen] = useState<boolean>(false)
 
     const { currentChatUser } = useCurrentChatUser()
@@ -30,6 +48,8 @@ const TopChat = () => {
 	
 	const {onlineUsers} = useAuthStore()
 	const {data : session, update} =  useSession()
+
+
 	
 
   const checkContactExists = () => {
@@ -54,20 +74,25 @@ const TopChat = () => {
   setOpen(false)
  }
 
- console.log("Typing info in TopChat:", typing.message)
+ console.log("Typing info in TopChat:", typing?.sender)
 
   return (
-    <div className='w-full flex items-center justify-between sticky top-0 z-50 h-[6vh] p-2 border-b bg-background'>
-        <div className='flex items-center'>
-            <Avatar className='z-40'>
+    <div className='w-full  flex items-center justify-between sticky top-0 z-50 md:h-[6vh]  p-2 border-b bg-background'>
+        <div className='relative flex items-center ml-8'>
+			<div onClick={() =>{
+setCurrentChatUser(null)
+setCurrentChatId(null)
+ backToHome()
+			}} className='absolute top-3 -left-[30px] cursor-pointer'><ChevronLeft size={20} className='text-primary'/></div>
+            <Avatar className='z-30'>
 					<AvatarImage src={currentChatUser?.userImage?.url} alt={currentChatUser?.email} className='object-cover' />
 					<AvatarFallback className='uppercase'>{currentChatUser?.email}</AvatarFallback>
 				</Avatar>
                 <div className='ml-2'>
-                    <h2 className='font-medium text-sm'>{currentChatUser?.email}</h2>
+                    <h2 className='font-medium text-sm'> {currentChatUser?.firstName ? `${currentChatUser?.firstName} `  : currentChatUser?.email}</h2>
                     {/* TYPING */}
-					{typing.message ? (
-<div className='text-xs flex items-center gap-1 text-muted-foreground'>
+					{typing.sender?._id === currentChatUser?._id &&  typing.message ? (
+                       <div className='text-xs flex items-center gap-1 text-muted-foreground'>
 									
 									<div className='self-end mb-1 '>
 										<div className='flex justify-center items-center gap-1'>
@@ -157,9 +182,31 @@ const TopChat = () => {
 								))}
 						</div> */}
 						{
-							checkContactExists() && (<div>
-							<Button onClick={() => deleteContact(String(currentChatUser?._id))} variant='destructive' className='w-full mt-4 mb-2'>Delete Contact</Button>
-						    </div>	)
+							checkContactExists() ? (
+								<div>
+									<Button onClick={() => {
+deleteContact(String(currentChatUser?._id))
+setOpen(false)
+									} } variant='destructive' className='w-full mt-4 mb-2'>Delete Contact</Button>
+								</div>
+							) : (
+								currentChatUser?.email ? (
+									<div>
+										<Button
+											onClick={() =>{
+ onCreateContact({ email: currentChatUser?.email ?? '' })
+ setOpen(false)
+											}}
+											variant='outline'
+											className='bg-primary hover:bg-primary/80 w-full mt-4 mb-2'
+											disabled={!currentChatUser?.email}
+										
+										>
+											Add Contact
+										</Button>
+									</div>
+								) : null
+							)
 						}
 						
 					</div>

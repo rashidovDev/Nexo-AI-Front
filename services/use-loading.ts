@@ -8,7 +8,7 @@ type Store = {
 	setLoading: (isLoading: boolean) => void
 	loadMessages: boolean
 	setLoadMessages: (loadMessages: boolean) => void
-	typing: {  message: string }
+	typing: { sender : IUser | null, message: string }
 	setTyping: (typing: { sender: IUser | null; message: string }) => void
 }
 

@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from '@/hooks/use-toast'
 import { generateToken } from '@/lib/generate-token'
 import { useMutation } from '@tanstack/react-query'
-import { Camera, Delete, LogIn, Moon, Plus, Sun, Trash, Upload, VolumeOff } from 'lucide-react'
+import { Camera, ChevronRight, Delete, LogIn, Moon, Plus, Sun, Trash, Upload, VolumeOff } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 import { useTheme } from 'next-themes'
 import React, { useEffect, useState } from 'react'
@@ -96,15 +96,21 @@ const Settings = () => {
   return (
     <div className='px-3'>
 
-     <div className='flex items-center mb-5 cursor-pointer' onClick={() => setIsProfileOpen(true)}>
+     <div className='flex items-center justify-between mb-5 cursor-pointer' onClick={() => setIsProfileOpen(true)}>
+      <div className='flex items-center'>
+        
       <Avatar className='w-12 h-12'>
 						<AvatarImage src={session?.currentUser?.userImage?.url} alt={session?.currentUser?.email}  className='object-cover' />
 							<AvatarFallback className='text-xl uppercase font-spaceGrotesk'>A</AvatarFallback>
 						</Avatar>
             <div className='ml-3'>
           <h1 className='text-md font-spaceGrotesk font-semibold'>
-			{session?.currentUser?.firstName} {session?.currentUser?.lastName}</h1>
+		    	{session?.currentUser?.firstName} {session?.currentUser?.lastName}</h1>
           <p className='text-[12px] text-muted-foreground'>{session?.currentUser?.email}</p>
+            </div>
+      </div>
+            <div>
+              <ChevronRight size={16}/>
             </div>
      </div>
 
@@ -156,7 +162,7 @@ const Settings = () => {
 						</div>
 
     <Sheet open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-		<SheetContent side={'left'} className='w-80 p-2 max-md:w-full'>
+		<SheetContent side={'left'} className='md:w-[350px] w-full p-2 max-md:w-full'>
 				<SheetHeader>
 						<SheetTitle className='text-2xl'>My profile</SheetTitle>
 						<SheetDescription>
