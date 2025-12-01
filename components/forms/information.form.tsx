@@ -35,14 +35,14 @@ const InformationForm : FC  <InformationFormProps> = ({setOpenItem}) => {
   const { mutate, isPending } = useMutation({
     mutationFn: async (payload: z.infer<typeof profileSchema>) => {
       const token = await generateToken(session?.currentUser)
-      console.log('Generated token:', token)
+    
       const { data } = await apiClient.put('/user/edit-profile', payload, { headers: { Authorization: `Bearer ${token}` } })
-      console.log('Edit profile response data:', data)
+      
       return data
     },
     onSuccess: () => {
-      toast({ description: 'Profile updated successfully' })
       update()
+      toast({ description: 'Profile updated successfully' })
       setOpenItem?.("") // ✅ closes the accordion
     },
   })

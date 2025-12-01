@@ -130,7 +130,7 @@ setCurrentChatId(null)
     <SheetHeader>
       <SheetTitle/>
     </SheetHeader>
-	<div className='mx-auto w-1/2 max-md:w-1/4 h-36 relative'>
+	<div className='mx-auto w-1/2  h-36 relative'>
 						<Avatar className='w-36 h-36 mx-auto'>
 							<AvatarImage src={currentChatUser?.userImage?.url} alt={currentChatUser?.email} className='object-cover' />
 							<AvatarFallback className='text-6xl uppercase font-spaceGrotesk'>{currentChatUser?.email}</AvatarFallback>

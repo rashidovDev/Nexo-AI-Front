@@ -68,13 +68,17 @@ const Chat :FC<Props> = ({onSubmitMessage, messageForm, messages, onReadMessages
 		}, 0)
 	}
   return (
-    <div className='w-full relative'>
+    <div className='w-full h-[100svh] flex flex-col overflow-hidden'>
      {/* TOP CHAT h-6vh */}
 
-     <TopChat onCreateContact={onCreateContact}/>
+<div className='shrink-0'>    <TopChat onCreateContact={onCreateContact}/></div>
+ 
 
      {/* MESSAGES  h-90vh */}
+     <div className='flex-1 overflow-y-auto overscroll-contain'>
+
      <ChatMessage   onReaction={onReaction} messages={messages} onSubmitMessage={onSubmitMessage} onDeleteMessage={onDeleteMessage}/> 
+     </div>
 
        {/* <div className='w-full h-[88vh] flex items-center justify-center'>
 					<div className='text-[100px] cursor-pointer' onClick={() => onSubmitMessage({ text: '✋' })}>
@@ -84,7 +88,7 @@ const Chat :FC<Props> = ({onSubmitMessage, messageForm, messages, onReadMessages
 
 
    {/* Input Message h-5vh */}
-   <div className='h-[5vh]'>
+   <div className='h-[6svh] sticky bottom-0 bg-background z-50 border-t'>
   <Form {...messageForm}>
     <form
       onSubmit={messageForm.handleSubmit(onSubmitMessage)}
@@ -136,7 +140,7 @@ const Chat :FC<Props> = ({onSubmitMessage, messageForm, messages, onReadMessages
 </Popover>
       
        <Button type='submit' variant={'secondary'} className='h-full rounded-none w-[50px] bg-primary'>
-       <Send/>
+       <Send className='text-white' />
       </Button>
     </form>
   </Form>

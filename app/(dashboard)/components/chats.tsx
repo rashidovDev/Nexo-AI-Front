@@ -20,8 +20,7 @@ interface Props {
 
 const Chats : FC <Props> = ({chats, allMessages, setAllMessages}) => {
 
-
-  const {onlineUsers} = useAuthStore()
+const {onlineUsers} = useAuthStore()
 const {data : session} = useSession()
 const {currentChatUser, setCurrentChatUser, setCurrentChatId , currentChatId} = useCurrentChatUser()
 const router = useRouter()
@@ -45,7 +44,7 @@ const renderContact = (chat : IChat) => {
   }
 }
   
-  let otherUser: IUser | undefined;
+let otherUser: IUser | undefined;
 
 if (!chat?.isGroup) {
   otherUser = chat?.participants?.find(
@@ -57,7 +56,10 @@ if (!chat?.isGroup) {
     const selectChat = () => {
         // console.log('chat selected', chat._id)
         // if(currentChatUser?._id === chat._id) return;
-        if (!otherUser) return;
+        if (!otherUser) {
+      router.push(`/?chat=${chat._id}`);
+      return
+        }  
         setCurrentChatUser(otherUser)
         setCurrentChatId(chat._id)
         console.log('ALL MESSAGES BEFORE FILTER', otherUser)
@@ -84,9 +86,9 @@ if (!chat?.isGroup) {
             <div className='relative'>
             <Avatar>
   <AvatarImage src={otherUser?.userImage?.url} alt={otherUser?.email ?? ''} className='object-cover'/>
-  <AvatarFallback className='uppercase'>{otherUser?.firstName ?? ''}</AvatarFallback>
+  <AvatarFallback className='uppercase'>{otherUser?.firstName ?  otherUser?.firstName?.charAt(0) : otherUser?.email.charAt(0)}</AvatarFallback>
 </Avatar>
- {onlineUsers.some(user => user?._id === otherUser?._id) && (
+ { onlineUsers.some(user => user?._id === otherUser?._id) && (
 							<div className='size-3 bg-green-500 absolute rounded-full bottom-0 right-0' />
 						)}
             </div>

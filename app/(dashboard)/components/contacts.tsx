@@ -1,12 +1,5 @@
 import React, { FC } from 'react'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+
 import { IChat, IContact, IUser } from '@/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useRouter } from 'next/navigation'
@@ -14,7 +7,7 @@ import { useCurrentChatUser } from '@/services/current-chat'
 import { useAuthStore } from '@/services/use-auth'
 
 import { useSelectedOption } from '@/services/current-option'
-import { UserPlus } from 'lucide-react'
+import { UserPlus, Users } from 'lucide-react'
 import { useModal } from '@/services/use-modal'
 
 interface Props {
@@ -24,7 +17,7 @@ interface Props {
 
 const Contacts : FC <Props> = ({contacts, createDM}) => {
     const {setSelectedOption} = useSelectedOption()
-  const {setOpenAddContactModal} = useModal()
+  const {setOpenAddContactModal, setOpenCreateGroupModal} = useModal()
   const {currentChatUser, setCurrentChatUser, setCurrentChatId} = useCurrentChatUser()
   const router = useRouter()
   const {onlineUsers} = useAuthStore()
@@ -50,10 +43,18 @@ const Contacts : FC <Props> = ({contacts, createDM}) => {
   <div 
   className="cursor-pointer p-1">
       <div className="">
-        <div onClick={() => setOpenAddContactModal(true)} className='ml-3  border-b flex items-center cursor-pointer '>
-            <UserPlus size={18} className='text-primary mb-2'/>
-            <div className="ml-5 mb-2 text-primary">Invite Friend</div>
+        <div>
+
+        <div onClick={() => setOpenAddContactModal(true)} className='ml-3  border-b  py-2 flex items-center cursor-pointer '>
+            <UserPlus size={18} className='text-primary mb-1'/>
+            <div className="ml-5 mb-1 text-primary">Invite Friend</div>
           </div>
+
+           {/* <div onClick={() => setOpenCreateGroupModal(true)} className='ml-3  mt-2 border-b flex items-center cursor-pointer '>
+            <Users size={18} className='text-primary mb-1'/>
+            <div className="ml-5 mb-1 text-primary">Create Group</div>
+          </div> */}
+        </div>
       {contacts?.length > 0 ? contacts?.map((contact) => (
         <div
           onClick={() => selectChat(contact)}
@@ -74,7 +75,7 @@ const Contacts : FC <Props> = ({contacts, createDM}) => {
           {/* Name + status */}
      
            <div className='ml-3 border-b w-full '>
-            <div className="font-medium ">{contact?.firstName} {contact?.lastName} .</div>
+            <div className="font-medium ">{contact?.firstName} {contact?.lastName} </div>
             <div className="text-sm text-slate-400">last seen recently</div>
           </div>
          

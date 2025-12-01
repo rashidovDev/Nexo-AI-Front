@@ -1,3 +1,4 @@
+import { ZodVoid } from 'zod/v3'
 import { create } from 'zustand'
 
 interface DialogState {
@@ -5,6 +6,8 @@ interface DialogState {
   setOpenAddContactModal: (open: boolean) => void
   openUploadFileModal: boolean
   setOpenUploadFileModal: (open: boolean) => void
+  openCreateGroupModal : boolean
+  setOpenCreateGroupModal : (open : boolean) => void
 }
 
 export const useModal= create<DialogState>((set) => ({
@@ -12,4 +15,6 @@ export const useModal= create<DialogState>((set) => ({
   setOpenAddContactModal: (open) => set({ openAddContactModal: open }),
   openUploadFileModal: false,
   setOpenUploadFileModal: (open) => set({ openUploadFileModal: open }),
+  openCreateGroupModal : false,
+  setOpenCreateGroupModal : (open) => set({ openCreateGroupModal : open})
 }))

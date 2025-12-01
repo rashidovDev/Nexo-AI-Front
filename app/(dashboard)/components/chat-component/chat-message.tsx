@@ -24,7 +24,7 @@ const ChatMessage : FC <Props> = ({messages, onSubmitMessage, onReaction, onDele
 
   const {loadMessages} = useLoading()
   return (
-    <div className='flex flex-col justify-end z-40 min-h-[89vh]'>
+    <div className='flex flex-col justify-end z-40 min-h-[88vh]'>
         {/* LOADING */}
 
         {loadMessages ? <ChatLoading/> :
@@ -33,14 +33,13 @@ const ChatMessage : FC <Props> = ({messages, onSubmitMessage, onReaction, onDele
 			))}
 
 			{/* Start conversation */}
-			{messages?.length === 0 && (
-				<div className='w-full h-[88vh] flex items-center justify-center'>
-					<div onClick={() => onSubmitMessage({ text: '✋' })} className='text-[100px] cursor-pointer' >
-						✋
-					</div>
-				</div>
-			)
-        }
+		{!loadMessages && messages?.length === 0 && (
+  <div className='w-full h-[88vh] flex items-center justify-center'>
+    <div onClick={() => onSubmitMessage({ text: '✋' })} className='text-[100px] cursor-pointer'>
+      ✋
+    </div>
+  </div>
+)}
         {/* <ChatLoading/> */}
 
         {/* START CHATTING */}

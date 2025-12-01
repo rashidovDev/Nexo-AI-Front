@@ -18,7 +18,7 @@ const icons = [
 const Footer = () => {
   const {selectedOption,setSelectedOption} = useSelectedOption()
   return (
-    <div className='absolute bottom-0 flex justify-around items-center w-full h-[5vh] border-t'>
+    <div className='absolute bottom-0 flex justify-around items-center w-full h-[6svh] border-t'>
         {
           icons.map(({id, name, icon: Icon}) => (
             <div key={id} onClick={() => setSelectedOption(name.toLowerCase() as 'chats' | 'contacts' | 'settings')}

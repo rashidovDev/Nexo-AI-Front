@@ -38,15 +38,15 @@ const MessageCard : FC <Props> = ({message, onReaction, onDeleteMessage}) => {
   return (
     <ContextMenu>
   <ContextMenuTrigger asChild>
-    <div className={cn('m-2.5 font-medium text-xs flex ', message?.sender === currentChatUser?._id  ? 'justify-start' : 'justify-end')}>
-      <div className={cn('relative inline p-2 pl-2.5 pr-12 max-w-full rounded-lg ', message?.sender === currentChatUser?._id ? 'bg-primary' : 'bg-secondary')}>
+    <div className={cn('m-2.5 font-medium text-xs flex touch-manipulation select-none', message?.sender === currentChatUser?._id  ? 'justify-start' : 'justify-end')}>
+      <div className={cn('relative inline p-2 pl-2.5 pr-12 max-w-full rounded-lg ', message?.sender === currentChatUser?._id ? 'bg-primary text-white' : 'bg-secondary')}>
        {message?.image ? (
     <div className='w-[200px]'>
 
       <Image src={message?.image} alt={message?.image} width={201} height={150} className='rounded-lg object-cover mx-auto'/>
     </div>
        ): (
- <p className='text-sm text-white ' > {message?.text}</p>
+ <p className={cn('text-sm dark:text-white  text-slate-800', message?.sender === currentChatUser?._id ? ' text-white' : 'bg-secondary')} > {message?.text}</p>
        )}
           
            <div className='flex items-center justify-between '>
@@ -62,14 +62,15 @@ const MessageCard : FC <Props> = ({message, onReaction, onDeleteMessage}) => {
 
             {message?.reactions && ( 
               message.reactions.length > 0) && ( message.reactions.map((reaction) => (
-              <div key={reaction._id} onClick = {() => {
+              <div  key={reaction._id} onClick = {() => {
               if(reaction.user._id === session?.currentUser?._id){
               onReaction('', message._id) 
                 }
              return
               } } 
-              className='cursor-pointer mr-1  p-1 w-[50px] h-[30px] bg-white rounded-lg flex items-center justify-between mt-1'>
-                <span>{reaction.reaction}</span>   
+              className={cn('cursor-pointer mr-1  p-1 w-[50px] h-[30px]  bg-white rounded-lg flex items-center justify-between mt-1',
+               message?.sender === session?.currentUser?._id && 'dark:bg-white bg-primary')}>
+                <span>{reaction.reaction}</span> 
                 <Avatar className='w-5 h-5'>
                   <AvatarImage src={reaction.user.userImage?.url} className='object-cover'/>
                   <AvatarFallback className='uppercase'>{reaction.user?.firstName}</AvatarFallback>

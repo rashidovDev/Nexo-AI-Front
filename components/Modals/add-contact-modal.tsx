@@ -60,7 +60,7 @@ const ModalAddContact: React.FC <Props> = ({ contactForm, onCreateContact }) => 
 
               
 							<Button type='submit' className='w-full' size={'lg'} >
-								Submit
+							Add contact
 							</Button>
 						</form>
 					</Form>

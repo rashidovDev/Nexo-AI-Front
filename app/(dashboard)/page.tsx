@@ -11,7 +11,7 @@ import Chat from "./components/chat-component/chat"
 import { useCurrentChatUser } from "@/services/current-chat"
 import { useForm } from "react-hook-form"
 import z from "zod"
-import { contactSchema, emailSchema, messageSchema } from "@/lib/validation"
+import { contactSchema, emailSchema, groupSchema, messageSchema } from "@/lib/validation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useSelectedOption } from "@/services/current-option"
 import Contacts from "./components/contacts"
@@ -32,6 +32,7 @@ import { CONST } from "@/lib/constants"
 import { set } from "mongoose"
 import ModalAddContact from "@/components/Modals/add-contact-modal"
 import ModalUploadFile from "@/components/Modals/upload-file-modal"
+import ModalCreateGroup from "@/components/Modals/create-group-modal"
 
 interface GetSocketType {
   receiver: IUser
@@ -314,12 +315,47 @@ const Home = () => {
     defaultValues: { email: "" },
   })
 
+ const groupForm = useForm<z.infer<typeof groupSchema>>({
+  resolver: zodResolver(groupSchema),
+  defaultValues: {
+    name: "",
+    participantIds: [], // initialize as empty array
+  },
+})
   const messageForm = useForm<z.infer<typeof messageSchema>>({
     resolver: zodResolver(messageSchema),
     defaultValues: { text: "", image: "" },
   })
 
   // 🔹 ADD CONTACT
+  
+  //  const onCreateGroup = async (values: z.infer<typeof groupSchema>) => {
+  //   setCreating(true)
+  //    console.log("RECEIVED VALUES IN onCreateGroup:", values); 
+  //   const token = await generateToken(session?.currentUser)
+  //   try {
+  //     const { data } = await apiClient.post<{ group : IChat }>(
+  //       "/chat/create-group",
+  //       values,
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     )
+  //     console.log(data)
+  //     await update()
+  //     toast({ description: "Group created successfully" })
+  //     // setOpenAddContactModal(false)
+  //     // contactForm.reset()
+  //   } catch (error: any) {
+  //     toast({
+  //       description: error?.response?.data?.message || "Something went wrong",
+  //       variant: "destructive",
+  //     })
+  //      setOpenAddContactModal(false)
+  //   } finally {
+  //     setCreating(false)
+  //   }
+  // }
+
+
   const onCreateContact = async (values: z.infer<typeof emailSchema>) => {
     setCreating(true)
     const token = await generateToken(session?.currentUser)
@@ -343,6 +379,7 @@ const Home = () => {
         description: error?.response?.data?.message || "Something went wrong",
         variant: "destructive",
       })
+       setOpenAddContactModal(false)
     } finally {
       setCreating(false)
     }
@@ -366,7 +403,7 @@ const Home = () => {
 			)
 			socket.current?.emit('messageRead', { messages: data.messages, receiver: currentChatUser })
      
-		setMessages(prev => {
+	setMessages(prev => {
   return prev.map(item => {
     const message = data.messages.find(msg => msg._id === item._id)
     
@@ -490,14 +527,13 @@ setChats(prev =>
         { ...values, receiver: currentChatUser?._id },
         { headers: { Authorization: `Bearer ${token}` } }
       )
+      console.log("FF",data)
   setMessages(prev => {
   const exists = prev.some(m => m._id === data.message._id);
   if (exists) return prev;
 
   return [...prev, data.message];
 });
-
-
 await getChats()
 setChats((prev) =>
         prev.map((chat) =>
@@ -511,6 +547,10 @@ setChats((prev) =>
         receiver: data.receiver,
         sender: data.sender,
       })
+
+      if (!data.sender.muted) {
+				playSound(data.sender.sendingSound  || "sending.mp3")
+			}
 
       messageForm.reset()
       socket.current?.emit("newChatCreated", {
@@ -562,10 +602,9 @@ setChats((prev) =>
 		}
 	}
 
- const onTyping = (e: ChangeEvent<HTMLInputElement>) => {
-
+const onTyping = (e: ChangeEvent<HTMLInputElement>) => {
         socket.current?.emit('typing', { receiver: currentChatUser, sender: session?.currentUser, message: e.target.value })
-	}
+}
 
    const createDM = async (userId: string) => {
   const token = await generateToken(session?.currentUser);
@@ -598,6 +637,7 @@ setChats((prev) =>
     <div>
       <div className="">
           <ModalAddContact contactForm={contactForm} onCreateContact={onCreateContact}/>
+          {/* <ModalCreateGroup contacts={contacts} groupForm={groupForm} onCreateGroup={onCreateGroup}/> */}
           <ModalUploadFile onSubmitMessage={onSubmitMessage}/>
       </div>
 
@@ -605,11 +645,15 @@ setChats((prev) =>
     fixed inset-0 md:w-[350px] h-screen w-full md:mx-0 mx-auto z-50 border-r flex 
     ${isMobile && currentChatUser?._id ? "hidden" : "flex"}
   `}>
-        <div className="md:w-[20%] w-[13%]">
+        <div className="md:w-[20%] md:block hidden">
           <LeftBar />
         </div>
-        <div className="w-[87%] mx-auto border-l relative">
+        <div className="w-[100%] mx-auto border-l relative">
           <Header />
+          {selectedOption === 'chats' && <div className="w-[90%] mx-auto md:hidden mb-2">
+            <LeftBar />
+          </div>}
+          
 
           {searchQuery.trim() !== "" ? (
             <SearchUser />

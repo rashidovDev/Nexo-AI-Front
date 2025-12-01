@@ -23,7 +23,7 @@ const Header = () => {
   <div className='mb-2 p-1'>
           <div className='mb-1 flex justify-between items-center '>
             <ModeToggle/>
-           <h1 className='capitalize text-center text-lg'>{selectedOption}</h1>
+           <h1 className='capitalize text-center font-semibold text-lg'>{selectedOption}</h1>
            <SquarePen onClick={() => setOpenAddContactModal(true)} className='cursor-pointer mr-2' size={15}/>
           </div>
          {/* SEARCH */}

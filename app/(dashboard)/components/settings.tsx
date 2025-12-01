@@ -156,8 +156,8 @@ const Settings = () => {
 	 onClick={() => signOut()}
 	 className='flex justify-between items-center bg-destructive p-2 cursor-pointer rounded-md my-2' >
 							<div className='flex items-center gap-1'>
-								<LogIn size={16} />
-								<span className='text-sm'>Logout</span>
+								<LogIn size={16} className='text-white' />
+								<span className='text-sm  text-white'>Logout</span>
 							</div>
 						</div>
 
@@ -179,16 +179,16 @@ const Settings = () => {
         onClick={() => setDialogOpen(true)}
         className={cn(
           `absolute w-7 h-7 rounded-full flex justify-center items-center
-          bg-blue-500 z-50 bottom-0 right-5 cursor-pointer`,
+          bg-blue-500 z-50 -bottom-2 right-2 cursor-pointer`,
           session?.currentUser?.userImage
             ? 'bg-red-500 hover:bg-red-600'
             : 'bg-blue-500'
         )}
       >
         {session?.currentUser?.userImage ? (
-          <Trash size={16} />
+          <Trash size={12} />
         ) : (
-          <Camera size={16} />
+          <Camera size={12} />
         )}
       </Button>
     </DialogTrigger>
@@ -217,7 +217,7 @@ const Settings = () => {
 
       <DialogFooter>
         <DialogClose asChild>
-          <Button variant="outline">Cancel</Button>
+          <Button className='mt-3 md:mt-0' variant="outline">Cancel</Button>
         </DialogClose>
 
         {session?.currentUser?.userImage ? (
@@ -254,13 +254,23 @@ const Settings = () => {
   </form>
 </Dialog>
 
-						<Avatar className='w-full h-36'>
-							<AvatarImage src={session?.currentUser?.userImage?.url} alt={session?.currentUser?.email}  className='object-cover' />
-							<AvatarFallback className='text-6xl uppercase font-spaceGrotesk'>
-								{session?.currentUser?.firstName?.charAt(0)}{session?.currentUser?.lastName?.charAt(0)}	
-							</AvatarFallback>			
-						</Avatar>
-					</div>
+<div className='flex justify-center items-center'>
+
+					<Avatar className='w-36 h-36 rounded-full overflow-hidden'>
+  <AvatarImage 
+    src={session?.currentUser?.userImage?.url} 
+    alt={session?.currentUser?.email}  
+    className='object-cover w-full h-full rounded-full'
+  />
+  <AvatarFallback className='text-6xl uppercase font-spaceGrotesk rounded-full flex items-center justify-center'>
+    {session?.currentUser?.firstName
+      ? session?.currentUser?.firstName.charAt(0)
+      : session?.currentUser?.email?.charAt(0)}
+  </AvatarFallback>
+</Avatar>
+</div>
+</div>
+					
     <Accordion type='single'      value={openItem}
       onValueChange={setOpenItem} collapsible className='mt-4'>
 						<AccordionItem value='item-1'>

@@ -32,3 +32,13 @@ export const confirmTextSchema = z.object({ confirmText: z.string() }).refine(da
 	message: 'You must type DELETE to confirm.',
 	path: ['confirmText'],
 })
+
+export const groupSchema = z.object({
+  name: z.string().min(3),
+  participantIds: z
+    .array(
+      z
+        .string()
+    )
+    .min(1, "At least 1 participant is required"),
+})

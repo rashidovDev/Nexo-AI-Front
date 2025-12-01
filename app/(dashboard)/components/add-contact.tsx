@@ -7,7 +7,7 @@ import { useModal } from '@/services/use-modal'
 
 
 const AddContact : FC= () => {
-	const { setOpenAddContactModal} = useModal()
+	const { setOpenAddContactModal, setOpenCreateGroupModal} = useModal()
   return (
    <div className='h-screen w-full flex z-10 relative'>
 			<div className='flex justify-center items-center z-50 w-full'>
