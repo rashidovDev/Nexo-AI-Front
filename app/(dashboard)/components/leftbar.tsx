@@ -13,9 +13,9 @@ const items = [
 
 export default function Leftbar() {
 
-    const router = useRouter()
 
-  const { selectChatType, setSelectChatType,setSelectedOption, selectedOption} = useSelectedOption()
+
+  const { selectChatType, setSelectChatType,setSelectedOption, selectedOption, unreadChatCount} = useSelectedOption()
   return (
     <div className="flex w-full justify-between md:flex-col items-center md:mt-4">
       {items.map((item, index) => (
@@ -30,20 +30,25 @@ export default function Leftbar() {
           {/* Render icon dynamically */}
           <item.icon size={22} className="hidden md:block" />
           <div className="flex items-center">
-        <p className="md:text-[10px] text-[15px]  ">{item.label}</p> <span className={cn("ml-2 w-4 h-4 rounded-full bg-secondary flex items-center justify-center md:hidden", selectChatType === item.name && 'text-white bg-primary')}  >1</span>
+        <p className="md:text-[10px] text-[15px] ">{item.label}</p> 
+{unreadChatCount !== null && unreadChatCount > 0 &&  item.name !== 'groups' && (
+  <span
+    className={cn(
+      "ml-2 min-w-[16px] h-[16px] px-1 rounded-full dark:text-white text-slate-800 bg-secondary text-[10px]  flex items-center justify-center md:hidden",
+      selectChatType === "unread" && "bg-primary "
+    )}
+  >
+    {unreadChatCount}
+  </span>
+)}
+      
           </div>
         
         </div>
 
         
       ))}
-      {/* <div
-        onClick={() => router.push("/qr/camera")}
-        className="flex flex-col justify-center items-center hover:text-green-500 text-[10px] mt-6 cursor-pointer transition-colors"
-      >
-        <QrCode size={24} />
-        <p className="text-[10px] mt-1">Scan QR</p>
-      </div> */}
+     
     </div>
   );
 }

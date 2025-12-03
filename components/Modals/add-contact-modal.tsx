@@ -38,9 +38,9 @@ const ModalAddContact: React.FC <Props> = ({ contactForm, onCreateContact }) => 
         onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
         className="opacity-100   rounded-[10px] m-auto relative p- items-center justify-center flex"
       >
-        <div className=' bg-[#04080F] md:w-[500px] w-[90%] mx-auto border border-gray-700 rounded-lg p-6 '>
+        <div className=' dark:bg-[#04080F] bg-secondary dark:text-white  md:w-[500px] w-[90%] mx-auto border border-gray-700 rounded-lg p-6 '>
         <h1 className=' font-bold text-2xl'>Add Contact</h1>
-        <p className='text-sm text-left'> Fill in contact details below and submit when you're done.</p>
+        <p className='text-sm text-left dark:'> Fill in contact details below and submit when you're done.</p>
 
         <Form {...contactForm} >
 						<form onSubmit={contactForm.handleSubmit(onCreateContact)} className='space-y-2 w-full mt-4'>

@@ -62,6 +62,11 @@ export interface IMessage {
   }[];
 	  sender: IUser | string | ObjectId
   receiver: IUser | string | ObjectId
+  readBy? : {
+    at : Date
+    user : ObjectId | string
+    _id : ObjectId
+  }[]
 	createdAt: string
 	updatedAt: string
 	status: string

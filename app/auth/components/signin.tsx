@@ -21,9 +21,11 @@ import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/api/axios'
 import { IError } from '@/types'
 import { toast } from '@/hooks/use-toast'
+import { Oval } from 'react-loader-spinner'
 
 const Signin = () => {
   const {setStep, setEmail} = useAuthStore()
+  
 
     const form = useForm<z.infer<typeof emailSchema>>({
         resolver : zodResolver(emailSchema),
@@ -56,6 +58,8 @@ const Signin = () => {
       mutate(values.email)
     }
 
+    const isPend = true
+
   return (
    <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
   <Form {...form}>
@@ -77,8 +81,16 @@ const Signin = () => {
           </FormItem>
         )}
       />
+     
       <Button className="w-full" type="submit" disabled={isPending}>
-        Submit
+        Submit  {isPending && <span><Oval
+              height={60}
+              width={60}
+              color="#ffff"
+              // ariaLabel="audio-loading"
+              wrapperStyle={{}}
+              wrapperClass=""
+            /></span>}
       </Button>
     </form>
   </Form>

@@ -288,6 +288,7 @@ const Home = () => {
       )
       setAllMessages(data.messages)
       setMessages(data.messages)
+      // getChats()
     } catch {
       toast({ description: "Cannot fetch messages", variant: "destructive" })
     } finally {

@@ -20,7 +20,7 @@ const ModalUploadFile: React.FC <Props> = ({ onSubmitMessage}) => {
   {openUploadFileModal && (
     <motion.div
       key="modal-backdrop"
-      className="fixed inset-0  z-30 flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0  z-[9999] flex items-center justify-center bg-black bg-opacity-50"
       onClick={() => setOpenUploadFileModal(false)}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -35,9 +35,9 @@ const ModalUploadFile: React.FC <Props> = ({ onSubmitMessage}) => {
         onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
         className="opacity-100   rounded-[10px] m-auto relative p- items-center justify-center flex"
       >
-        <div className=' bg-[#04080F] md:w-[500px] w-[90%] mx-auto border border-gray-700 rounded-lg p-5 z-30'>
-        <h1 className='text-lg font-semibold'>Add Contact</h1>
-        <p className='text-sm text-left'> Fill in contact details below and submit when you're done.</p>
+        <div className=' dark:bg-[#04080F] bg-secondary md:w-[500px] w-[80%] mx-auto border border-gray-700 rounded-lg p-5 z-30'>
+        {/* <h1 className='text-lg font-semibold'>Add Contact</h1>
+        <p className='text-sm text-left'> Fill in contact details below and submit when you're done.</p> */}
 
         <div>
             <UploadDropzone 

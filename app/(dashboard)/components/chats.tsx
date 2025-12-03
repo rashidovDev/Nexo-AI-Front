@@ -1,6 +1,6 @@
  "use client"
 import { IChat, IContact, IMessage, IUser } from '@/types'
-import React, {FC, JSX} from 'react'
+import React, {FC, JSX, useEffect} from 'react'
 import { useRouter } from 'next/navigation'
 import { useCurrentChatUser } from '@/services/current-chat'
 import { cn, countUnread, sliceText } from '@/lib/utils'
@@ -11,6 +11,7 @@ import { CONST } from '@/lib/constants'
 import { count } from 'console'
 import { Check, CheckCheck, Image } from 'lucide-react'
 import { useAuthStore } from '@/services/use-auth'
+import { useSelectedOption } from '@/services/current-option'
 
 interface Props {
     chats : IChat[]
@@ -22,8 +23,11 @@ const Chats : FC <Props> = ({chats, allMessages, setAllMessages}) => {
 
 const {onlineUsers} = useAuthStore()
 const {data : session} = useSession()
-const {currentChatUser, setCurrentChatUser, setCurrentChatId , currentChatId} = useCurrentChatUser()
+const { selectChatType, setSelectChatType, setUnreadChatCount} = useSelectedOption()
+const { setCurrentChatUser, setCurrentChatId , currentChatId} = useCurrentChatUser()
 const router = useRouter()
+
+
 
 
 const filteredChats = chats.sort((a, b) => {
@@ -31,6 +35,53 @@ const filteredChats = chats.sort((a, b) => {
 			const dateB = b.lastMessage?.updatedAt ? new Date(b.lastMessage.updatedAt).getTime() : 0
 			return dateB - dateA
 		})
+
+ const filterChats = filteredChats.filter(chat => {
+  if (selectChatType === 'all') return true
+
+  if (selectChatType === 'private') return !chat.isGroup
+
+  if (selectChatType === "groups") return chat.isGroup
+
+  if (selectChatType === 'unread') {
+  const last = chat.lastMessage
+  const myId = session?.currentUser?._id
+
+  if (!last || !myId) return false
+
+  const isNotRead = !last?.readBy?.some(
+    (u: any) => u.user === myId || u === myId
+  )
+
+  const isSent = last.status === "sent"
+
+  return isNotRead && isSent
+}
+
+
+  return true
+})  
+
+const unreadChatCount = filteredChats.filter(chat => {
+  const last = chat.lastMessage
+  const myId = session?.currentUser?._id
+
+  if (!last || !myId) return false
+
+  const isNotRead = !last?.readBy?.some(
+    (u: any) => u.user === myId || u === myId
+  )
+
+  const isSent = last.status === "sent"
+
+  return isNotRead && isSent
+}).length
+
+useEffect(() => {
+  setUnreadChatCount(unreadChatCount)
+}, [unreadChatCount])
+
+console.log("FILTER", filterChats)
 let statusIcon: JSX.Element | null = null;
 
 
@@ -69,6 +120,7 @@ if (!chat?.isGroup) {
       
   
        router.push(`/?chat=${chat._id}`)
+       setSelectChatType('all')
     }
 
     const unread = allMessages.length > 0
@@ -86,7 +138,7 @@ if (!chat?.isGroup) {
             <div className='relative'>
             <Avatar>
   <AvatarImage src={otherUser?.userImage?.url} alt={otherUser?.email ?? ''} className='object-cover'/>
-  <AvatarFallback className='uppercase'>{otherUser?.firstName ?  otherUser?.firstName?.charAt(0) : otherUser?.email.charAt(0)}</AvatarFallback>
+  <AvatarFallback className='uppercase'>{otherUser?.firstName ?  otherUser?.firstName?.charAt(0) : otherUser?.email?.charAt(0)}</AvatarFallback>
 </Avatar>
  { onlineUsers.some(user => user?._id === otherUser?._id) && (
 							<div className='size-3 bg-green-500 absolute rounded-full bottom-0 right-0' />
@@ -126,14 +178,15 @@ if (!chat?.isGroup) {
     }
   return (
     <div className=' border-t h-[85vh] overflow-y-auto'>
-        {filteredChats?.length == 0 ? (
+        {filterChats?.length == 0 ? (
 
          <div  className='w-full h-[95vh] flex justify-center items-center'>
             No Chats Found
          </div>  ) :
        
-         chats?.map((chat) => (
+         filterChats?.map((chat) => (
   <div key={chat._id}>
+  
     {renderContact(chat)}
   </div>
 ))}

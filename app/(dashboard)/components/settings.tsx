@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from '@/hooks/use-toast'
 import { generateToken } from '@/lib/generate-token'
 import { useMutation } from '@tanstack/react-query'
-import { Camera, ChevronRight, Delete, LogIn, Moon, Plus, Sun, Trash, Upload, VolumeOff } from 'lucide-react'
+import { Camera, ChevronRight, Delete, LogIn, Moon, Plus, QrCode, Sun, Trash, Upload, VolumeOff } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 import { useTheme } from 'next-themes'
 import React, { useEffect, useState } from 'react'
@@ -34,12 +34,15 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { UploadButton, UploadDropzone } from '@/lib/uploadthing'
+import { useRouter } from 'next/navigation'
 
 
 const Settings = () => {
 
   const [file, setFile] = useState<File | null>(null);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+
+  const router = useRouter()
 
    const {data : session, update} =  useSession()
 
@@ -94,7 +97,18 @@ const Settings = () => {
 	})
 
   return (
-    <div className='px-3'>
+    <div className='px-3 relative h-[600px] '>
+      <div className='flex justify-between md:hidden cursor-pointer  items-center absolute -bottom-10 right-6  hover:bg-secondary rounded-md '>
+						 <div
+                    onClick={() => router.push("/qr/camera")}
+                    className="flex flex-col justify-center items-center hover:text-green-500 my-2
+                     text-[10px]  cursor-pointer transition-colors"
+                  >
+
+                    <QrCode className='' size={24} />
+                    <p className="text-[10px] mt-1 text-xs">Scan QR</p>
+                  </div>
+						</div>
 
      <div className='flex items-center justify-between mb-5 cursor-pointer' onClick={() => setIsProfileOpen(true)}>
       <div className='flex items-center'>
@@ -151,6 +165,8 @@ const Settings = () => {
 								onCheckedChange={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
 							/>
 						</div>
+
+            
 
      <div 
 	 onClick={() => signOut()}

@@ -20,6 +20,8 @@ import { useSession } from 'next-auth/react'
 import { useSelectedOption } from '@/services/current-option'
 
 
+
+
 interface Props {
     message  : IMessage
     onReaction: (reaction: string, messageId: string) => Promise<void>
@@ -28,13 +30,27 @@ interface Props {
 
 const MessageCard : FC <Props> = ({message, onReaction, onDeleteMessage}) => {
 
+  console.log('message', message)
+
     const {data : session} = useSession()
     
     	const { setEditedMessage } = useSelectedOption()
   	const reactions = ['👍', '😂', '❤️', '😍', '👎']
 
 
-  const {currentChatUser} = useCurrentChatUser()
+
+
+	const {currentChatUser} = useCurrentChatUser()
+	const lastSeenEntry =
+		message?.readBy
+			?.filter(item => String(item.user) !== String(session?.currentUser?._id))
+			?.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())[0]
+
+	const lastSeenAt = lastSeenEntry?.at ? new Date(lastSeenEntry.at) : null
+	const messageSentAt = new Date(message.updatedAt)
+	const lastSeenLabel = lastSeenAt
+		? `read at      ${format(lastSeenAt, 'hh:mm')}`
+		: `read at      ${format(messageSentAt, 'hh:mm')}`
   return (
     <ContextMenu>
   <ContextMenuTrigger asChild>
@@ -53,6 +69,8 @@ const MessageCard : FC <Props> = ({message, onReaction, onDeleteMessage}) => {
 
            <div className='right-1 bottom-0 absolute opacity-60 text-[9px] flex gap-[3px]'>
 							<p className=''>{format(message.updatedAt, 'hh:mm')}</p>
+           
+             
     
 							<div className='self-end'>
 								{message.sender !== currentChatUser?._id &&
@@ -94,11 +112,14 @@ const MessageCard : FC <Props> = ({message, onReaction, onDeleteMessage}) => {
       </ContextMenuItem>
     ))}
     </div>
-   {message.sender !== currentChatUser?._id && (
+   {message.sender === session?.currentUser?._id && (
          <div className='flex flex-col'>
          <ContextMenuSeparator />
        
-        
+		 <ContextMenuItem onClick={() => setEditedMessage(message)} className='cursor-pointer'>
+		{lastSeenLabel}
+		 </ContextMenuItem>
+         <ContextMenuSeparator className=''/>
          <ContextMenuItem onClick={() => setEditedMessage(message)} className='cursor-pointer'>
            <Edit size={14} className='mr-2' />
            <span>Edit</span> 
