@@ -398,9 +398,11 @@ const Home = () => {
       toast({ description: "Contact added successfully" })
       setOpenAddContactModal(false)
       contactForm.reset()
-    } catch (error: any) {
+    } catch (error) {
+      const serverMessage =
+        (error as { response?: { data?: { message?: string } } } | undefined)?.response?.data?.message
       toast({
-        description: error?.response?.data?.message || "Something went wrong",
+        description: serverMessage || "Something went wrong",
         variant: "destructive",
       })
        setOpenAddContactModal(false)
@@ -429,7 +431,7 @@ const Home = () => {
      
 	setMessages(prev => {
   return prev.map(item => {
-    const message = data.messages.find(msg => msg._id === item._id)
+    const message = data.messages.find((msg: { _id: string }) => msg._id === item._id)
     
     return message ? { ...item, status: CONST.READ } : item
   })
@@ -439,7 +441,7 @@ setChats(prev =>
     if (chat._id !== currentChatId) return chat;
 
     const updated = data.messages.find(
-      msg => msg._id === chat.lastMessage?._id
+      (      msg: { _id: string | undefined }) => msg._id === chat.lastMessage?._id
     );
 
     if (!updated) return chat;

@@ -8,13 +8,11 @@ import React, { FC, useState } from 'react'
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Separator } from '@/components/ui/separator'
-import { set } from 'mongoose'
 import { toast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/services/use-auth'
 import { generateToken } from '@/lib/generate-token'
@@ -57,7 +55,7 @@ const TopChat :FC <Props> = ({onCreateContact}) => {
   return contactIds.includes(String(currentChatUser?._id));
  };
 
-     const handleCopy = async (textToCopy : any) => {
+     const handleCopy = async (textToCopy : string) => {
     try {
       await navigator.clipboard.writeText(textToCopy);
 	 
@@ -166,7 +164,7 @@ setCurrentChatId(null)
 								</p>
 								</div>
 								<div>
-									<button onClick={() => handleCopy(currentChatUser?.username)}><Copy size={16}/></button>
+									<button onClick={() => currentChatUser?.username && handleCopy(currentChatUser.username)}><Copy size={16}/></button>
 								</div>
 							</div>
 						)}

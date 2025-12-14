@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from "react"
+import React, { FC, useCallback, useEffect } from "react"
 import { IChat, IUser } from "@/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useRouter } from "next/navigation"
@@ -17,7 +17,7 @@ const SearchUser: FC = () => {
   const { currentChatUser, setCurrentChatUser, setCurrentChatId } = useCurrentChatUser()
   const router = useRouter()
 
-  const searchByUsername = async (query: string): Promise<IUser[]> => {
+  const searchByUsername = useCallback(async (query: string): Promise<IUser[]> => {
     try {
       const token = await generateToken(session?.currentUser)
       const { data } = await apiClient.get<{ users: IUser[] }>(`/user?search=${encodeURIComponent(query)}`, {
@@ -27,7 +27,7 @@ const SearchUser: FC = () => {
     } catch {
       return []
     }
-  }
+  }, [session?.currentUser])
 
   useEffect(() => {
     const query = searchQuery.trim()
@@ -51,7 +51,7 @@ const SearchUser: FC = () => {
       isActive = false
       clearTimeout(delayDebounce)
     }
-  }, [searchQuery, session?.currentUser])
+  }, [searchQuery, session?.currentUser, searchByUsername])
 
   const createOrFetchChat = async (userId: string): Promise<IChat | null> => {
     try {

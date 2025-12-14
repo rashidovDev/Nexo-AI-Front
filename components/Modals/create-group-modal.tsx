@@ -48,18 +48,12 @@ const ModalCreateGroup: React.FC <Props> = ({ groupForm, onCreateGroup, contacts
   groupForm.setValue("participantIds", newSelection);
 };
 
-const handleCreate = (values: any) => {
-  // Update form value
-  // groupForm.setValue("participantIds", selectedUsers);
-
-  // Final payload
-  const payload = {
-    name: values.name,
+const handleCreate = (values: z.infer<typeof groupSchema>) => {
+  const payload: z.infer<typeof groupSchema> = {
+    ...values,
     participantIds: selectedUsers,
-  };
-
-  // Send request
-  onCreateGroup(payload);
+  }
+  onCreateGroup(payload)
 };
 
 
@@ -162,4 +156,3 @@ const handleCreate = (values: any) => {
 };
 
 export default ModalCreateGroup
-

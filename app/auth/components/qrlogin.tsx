@@ -63,12 +63,13 @@ const QrLoginBox = () => {
             callbackUrl: "/",
           })
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error(err)
 
         if (!active) return
 
-        if (err?.response?.status === 404) {
+        const statusCode = (err as { response?: { status?: number } }).response?.status
+        if (statusCode === 404) {
           setStatus("expired")
         } else {
           setStatus("error")

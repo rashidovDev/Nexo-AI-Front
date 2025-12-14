@@ -25,7 +25,7 @@ export const DELETE = async (url: string, id : string, token : string) => {
 if(data){ 
   toast({ description: data.message });
 }
-  }catch (error: any) {
+  }catch (error) {
 			if ((error as IError).response?.data?.message) {
 				return toast({ description: (error as IError).response.data.message, variant: 'destructive' })
 			}

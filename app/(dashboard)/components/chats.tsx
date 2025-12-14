@@ -1,5 +1,6 @@
  "use client"
 import { IChat, IContact, IMessage, IUser } from '@/types'
+import { ObjectId } from "mongoose";
 import React, {FC, JSX, useEffect} from 'react'
 import { useRouter } from 'next/navigation'
 import { useCurrentChatUser } from '@/services/current-chat'
@@ -8,7 +9,6 @@ import { useSession } from 'next-auth/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {format} from "date-fns"
 import { CONST } from '@/lib/constants'
-import { count } from 'console'
 import { Check, CheckCheck, Image } from 'lucide-react'
 import { useAuthStore } from '@/services/use-auth'
 import { useSelectedOption } from '@/services/current-option'
@@ -36,6 +36,12 @@ const filteredChats = chats.sort((a, b) => {
 			return dateB - dateA
 		})
 
+ const hasUserReadMessage = (readBy: IMessage["readBy"] | undefined, userId?: string | ObjectId) => {
+  if (!readBy || !userId) return false
+  const normalizedUserId = String(userId)
+  return readBy.some(reader => String(reader.user) === normalizedUserId)
+}
+
  const filterChats = filteredChats.filter(chat => {
   if (selectChatType === 'all') return true
 
@@ -49,9 +55,7 @@ const filteredChats = chats.sort((a, b) => {
 
   if (!last || !myId) return false
 
-  const isNotRead = !last?.readBy?.some(
-    (u: any) => u.user === myId || u === myId
-  )
+  const isNotRead = !hasUserReadMessage(last?.readBy, myId)
 
   const isSent = last.status === "sent"
 
@@ -68,9 +72,7 @@ const unreadChatCount = filteredChats.filter(chat => {
 
   if (!last || !myId) return false
 
-  const isNotRead = !last?.readBy?.some(
-    (u: any) => u.user === myId || u === myId
-  )
+  const isNotRead = !hasUserReadMessage(last?.readBy, myId)
 
   const isSent = last.status === "sent"
 
@@ -79,7 +81,7 @@ const unreadChatCount = filteredChats.filter(chat => {
 
 useEffect(() => {
   setUnreadChatCount(unreadChatCount)
-}, [unreadChatCount])
+}, [unreadChatCount, setUnreadChatCount])
 
 
 let statusIcon: JSX.Element | null = null;
@@ -123,8 +125,9 @@ if (!chat?.isGroup) {
        setSelectChatType('all')
     }
 
-    const unread = allMessages.length > 0
-  ? countUnread(allMessages, chat._id, session?.currentUser?._id!)
+    const currentUserId = session?.currentUser?._id
+    const unread = currentUserId && allMessages.length > 0
+  ? countUnread(allMessages, chat._id, currentUserId)
   : 0;
     return (
       <>
