@@ -195,7 +195,7 @@ const Settings = () => {
         onClick={() => setDialogOpen(true)}
         className={cn(
           `absolute w-7 h-7 rounded-full flex justify-center items-center
-          bg-blue-500 z-50 -bottom-2 right-2 cursor-pointer`,
+          bg-blue-500 z-50 bottom-0 right-4 cursor-pointer`,
           session?.currentUser?.userImage
             ? 'bg-red-500 hover:bg-red-600'
             : 'bg-blue-500'

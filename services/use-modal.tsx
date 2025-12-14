@@ -8,6 +8,8 @@ interface DialogState {
   setOpenUploadFileModal: (open: boolean) => void
   openCreateGroupModal : boolean
   setOpenCreateGroupModal : (open : boolean) => void
+    openContactOwnerModal : boolean
+  setOpenContactOwnerModal : (open : boolean) => void
 }
 
 export const useModal= create<DialogState>((set) => ({
@@ -16,5 +18,7 @@ export const useModal= create<DialogState>((set) => ({
   openUploadFileModal: false,
   setOpenUploadFileModal: (open) => set({ openUploadFileModal: open }),
   openCreateGroupModal : false,
-  setOpenCreateGroupModal : (open) => set({ openCreateGroupModal : open})
+  setOpenCreateGroupModal : (open) => set({ openCreateGroupModal : open}),
+    openContactOwnerModal : true,
+     setOpenContactOwnerModal : (open) => set({ openContactOwnerModal : open})
 }))

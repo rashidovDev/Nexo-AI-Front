@@ -33,6 +33,7 @@ import { set } from "mongoose"
 import ModalAddContact from "@/components/Modals/add-contact-modal"
 import ModalUploadFile from "@/components/Modals/upload-file-modal"
 import ModalCreateGroup from "@/components/Modals/create-group-modal"
+import ModalContactOwner from "@/components/Modals/contact-owner-modal"
 
 interface GetSocketType {
   receiver: IUser
@@ -65,17 +66,21 @@ const Home = () => {
 
 
   const chatId = searchParams.get("chat") || null
+  const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:6000"
 
   // 🔹 SOCKET SETUP
   useEffect(() => {
-    socket.current = io("ws://localhost:4000")
+    socket.current = io(socketUrl, {
+      transports: ["websocket"],
+    })
+
     console.log("Socket initialized")
 
     return () => {
       socket.current?.disconnect()
       console.log("Socket disconnected")
     }
-  }, [])
+  }, [socketUrl])
 
   // 🔹 RE-ADD USER AFTER CONNECT OR RECONNECT
  useEffect(() => {
@@ -103,140 +108,158 @@ const Home = () => {
   useEffect(() => {
     if (!socket.current) return
 
-    socket.current.on("getOnlineUsers", (data: { socketId: string; user: IUser }[]) => {
+    const handleOnlineUsers = (data: { socketId: string; user: IUser }[]) => {
       setOnlineUsers(data.map((item) => item.user))
-    })
+    }
 
-    socket.current.on("getNewContact", (user: IUser) => {
+    const handleNewContact = (user: IUser) => {
       setContacts((prev) => {
         const isExist = prev.some((item) => item._id === user._id)
         return isExist ? prev : [...prev, user]
       })
-    })
-
-    socket.current.on("getNewChatCreated", ({ message, receiver }: { message: IMessageChat; receiver: IUser }) => {
-     
-  setChats((prev) => {
-  const isExist = prev.some((item) => item._id === message.chat._id)
-  return isExist
-    ? prev
-    : [
-        ...prev,
-        {
-          _id: message.chat?._id,
-          participants: message.chat?.participants,
-          lastMessage: message.chat?.lastMessage,
-          isGroup: false, // required
-        } as IChat,
-      ]
-})
-    })
-
-    socket.current?.on('messagesReadByReceiver', (messages: IMessage[]) => {
-     
-				setMessages(prev => {
-					return prev.map(item => {
-						const message = messages.find(msg => msg._id === item._id)
-						return message ? { ...item, status: CONST.READ } : item
-					})
-				})
-
-       setChats(prev =>
-    prev.map(chat => {
-    const lastMsg = messages.find(msg => msg._id === chat.lastMessage?._id);
-
-    if (lastMsg) {
-      return {
-        ...chat,
-        lastMessage: {
-          ...chat.lastMessage!,
-          status: CONST.READ
-        }
-      };
     }
 
-    return chat;
-  })
-);
-
-			})
-
-    socket.current.on("getNewMessage", ({ message, receiver, sender }: GetSocketType) => {
-      	setTyping({ message: '', sender: null })
-       setAllMessages((prev) => [...prev, message])
-       
-     if(currentChatId === message.chat._id.toString()) {    
-        setMessages((prev) => {  
-        const isExist = prev.some((item) => item._id === message._id)
-        return isExist ? prev : [...prev, message]
+    const handleNewChat = ({ message }: { message: IMessageChat }) => {
+      setChats((prev) => {
+        const isExist = prev.some((item) => item._id === message.chat._id)
+        return isExist
+          ? prev
+          : [
+              ...prev,
+              {
+                _id: message.chat?._id,
+                participants: message.chat?.participants,
+                lastMessage: message.chat?.lastMessage,
+                isGroup: false,
+              } as IChat,
+            ]
       })
-     }
-     
-       setChats((prev) => {
-       return prev.map((chat) => {
+    }
+
+    const handleMessagesRead = (messages: IMessage[]) => {
+      setMessages((prev) =>
+        prev.map((item) => {
+          const message = messages.find((msg) => msg._id === item._id)
+          return message ? { ...item, status: CONST.READ } : item
+        })
+      )
+
+      setChats((prev) =>
+        prev.map((chat) => {
+          const lastMsg = messages.find((msg) => msg._id === chat.lastMessage?._id)
+          if (lastMsg) {
+            return {
+              ...chat,
+              lastMessage: {
+                ...chat.lastMessage!,
+                status: CONST.READ,
+              },
+            }
+          }
+          return chat
+        })
+      )
+    }
+
+    const handleNewMessage = ({ message, receiver, sender }: GetSocketType) => {
+      setTyping({ message: "", sender: null })
+      setAllMessages((prev) => [...prev, message])
+
+      if (currentChatId === message.chat._id.toString()) {
+        setMessages((prev) => {
+          const isExist = prev.some((item) => item._id === message._id)
+          return isExist ? prev : [...prev, message]
+        })
+      }
+
+      setChats((prev) =>
+        prev.map((chat) => {
           if (chat.participants.some((u) => u._id === sender._id)) {
             return { ...chat, lastMessage: message }
           }
           return chat
-       })
-       }
+        })
       )
+
       if (!receiver?.muted) {
         playSound(receiver?.notificationSound || "sending.mp3")
       }
+    }
 
-    })
+    const handleUpdatedMessage = ({ updatedMessage }: { updatedMessage: IMessage }) => {
+      setTyping({ message: "", sender: null })
+      setMessages((prev) =>
+        prev.map((item) =>
+          item._id === updatedMessage._id
+            ? { ...item, reactions: updatedMessage.reactions, text: updatedMessage.text }
+            : item
+        )
+      )
+      setChats((prev) =>
+        prev.map((item) =>
+          item._id === currentChatId
+            ? {
+                ...item,
+                lastMessage:
+                  item.lastMessage?._id === updatedMessage._id ? updatedMessage : item.lastMessage,
+              }
+            : item
+        )
+      )
+    }
 
-    socket.current?.on('getUpdatedMessage', ( {updatedMessage, receiver, sender}  ) => {
-				setTyping({ message: '', sender: null })
-				setMessages(prev =>
-					prev.map(item =>
-						item._id === updatedMessage._id ? { ...item, reactions: updatedMessage.reactions, text: updatedMessage.text } : item
-					)
-				)
-				setChats(prev =>
-					prev.map(item =>
-						item._id === currentChatId
-							? { ...item, lastMessage: item.lastMessage?._id === updatedMessage._id ? updatedMessage : item.lastMessage }
-							: item
-					)
-				)
-			})
+    const handleDeletedMessage = ({
+      deletedMessage,
+      filteredMessages,
+    }: {
+      deletedMessage: IMessage
+      filteredMessages: IMessage[]
+    }) => {
+      setMessages(filteredMessages)
+      const lastMessage = filteredMessages.length ? filteredMessages[filteredMessages.length - 1] : null
+      setChats((prev) =>
+        prev.map((item) =>
+          item._id === currentChatId
+            ? ({
+                ...item,
+                lastMessage:
+                  item.lastMessage && item.lastMessage._id === deletedMessage._id
+                    ? lastMessage
+                    : item.lastMessage,
+              } as IChat)
+            : item
+        )
+      )
+    }
 
-    socket.current?.on('getDeletedMessage', ( {deletedMessage, receiver, sender, filteredMessages}  ) => {
-        // setTyping({ message: '', sender: null })
-    
-      setMessages (filteredMessages)
-      const lastMessage = filteredMessages.length ? filteredMessages[filteredMessages.length - 1] : null;
-          setChats(prev =>
-  prev.map(item =>
-    item._id === currentChatId
-      ? ({
-          ...item,
-          lastMessage:  
-            item.lastMessage && item.lastMessage._id === deletedMessage._id
-              ? lastMessage // your new value
-              : item.lastMessage
-        } as IChat)
-      : item
-  )
-);
-    })
+    const handleTyping = ({ message, sender }: { message: string; sender: IUser }) => {
+      if (chatId === currentChatId) {
+        setTyping({ sender, message })
+      } else {
+        setTyping({ sender: null, message: "" })
+      }
+    }
 
-    socket.current?.on("getTypingMessage", ({ message, sender, receiver }: { message: string; sender: IUser, receiver : IUser }) => {
-          if(chatId === currentChatId ){
-           setTyping({ sender, message})
-          }else{
-            setTyping({ sender: null, message: ''})
-          }
-    })
+    socket.current.on("getOnlineUsers", handleOnlineUsers)
+    socket.current.on("getNewContact", handleNewContact)
+    socket.current.on("getNewChatCreated", handleNewChat)
+    socket.current.on("messagesReadByReceiver", handleMessagesRead)
+    socket.current.on("getNewMessage", handleNewMessage)
+    socket.current.on("getUpdatedMessage", handleUpdatedMessage)
+    socket.current.on("getDeletedMessage", handleDeletedMessage)
+    socket.current.on("getTypingMessage", handleTyping)
 
     return () => {
-      socket.current?.off("getOnlineUsers")
-      socket.current?.off("getNewContact")
-      socket.current?.off("getNewMessage")
+      socket.current?.off("getOnlineUsers", handleOnlineUsers)
+      socket.current?.off("getNewContact", handleNewContact)
+      socket.current?.off("getNewChatCreated", handleNewChat)
+      socket.current?.off("messagesReadByReceiver", handleMessagesRead)
+      socket.current?.off("getNewMessage", handleNewMessage)
+      socket.current?.off("getUpdatedMessage", handleUpdatedMessage)
+      socket.current?.off("getDeletedMessage", handleDeletedMessage)
+      socket.current?.off("getTypingMessage", handleTyping)
     }
-  },[playSound, session?.currentUser, currentChatUser?._id])
+  }, [playSound, currentChatId, chatId])
 
   // 🔹 FETCH CONTACTS
   const getContacts = async () => {
@@ -519,50 +542,94 @@ setChats(prev =>
 		}
 	}
 
-    const onSendMessage = async (values: z.infer<typeof messageSchema>) => {
+  const onSendMessage = async (values: z.infer<typeof messageSchema>) => {
+    if (!session?.currentUser || !currentChatUser?._id) return
     setCreating(true)
-    const token = await generateToken(session?.currentUser)
+
+    const payload = { ...values }
+    const tempId = `temp-${Date.now()}`
+    const timestamp = new Date().toISOString()
+    const optimisticMessage: IMessage = {
+      _id: tempId,
+      chat: currentChatId || "",
+      text: payload.text,
+      image: payload.image || "",
+      reactions: [],
+      sender: session.currentUser._id,
+      receiver: currentChatUser._id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      status: "pending",
+    }
+
+    setMessages((prev) => [...prev, optimisticMessage])
+    setAllMessages((prev) => [...prev, optimisticMessage])
+    setChats((prev) =>
+      prev.map((chat) =>
+        chat.participants.some((u) => u._id === currentChatUser._id)
+          ? { ...chat, lastMessage: optimisticMessage }
+          : chat
+      )
+    )
+    messageForm.reset()
+
     try {
+      const token = await generateToken(session.currentUser)
       const { data } = await apiClient.post<GetSocketType>(
         "/message/send-msg",
-        { ...values, receiver: currentChatUser?._id },
+        { ...payload, receiver: currentChatUser._id },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      console.log("FF",data)
-  setMessages(prev => {
-  const exists = prev.some(m => m._id === data.message._id);
-  if (exists) return prev;
 
-  return [...prev, data.message];
-});
-await getChats()
-setChats((prev) =>
+      setMessages((prev) => {
+        if (prev.some((m) => m._id === tempId)) {
+          return prev.map((m) => (m._id === tempId ? data.message : m))
+        }
+        const exists = prev.some((m) => m._id === data.message._id)
+        return exists ? prev : [...prev, data.message]
+      })
+
+      setAllMessages((prev) => {
+        if (prev.some((m) => m._id === tempId)) {
+          return prev.map((m) => (m._id === tempId ? data.message : m))
+        }
+        const exists = prev.some((m) => m._id === data.message._id)
+        return exists ? prev : [...prev, data.message]
+      })
+
+      await getChats()
+      setChats((prev) =>
         prev.map((chat) =>
-          chat.participants.some((u) => u._id === currentChatUser?._id)
-            ? { ...chat, lastMessage: {...data.message} }
+          chat.participants.some((u) => u._id === currentChatUser._id)
+            ? { ...chat, lastMessage: { ...data.message } }
             : chat
         )
-      ) 
-       socket.current?.emit("sendMessage", {
+      )
+
+      socket.current?.emit("sendMessage", {
         message: data.message,
         receiver: data.receiver,
         sender: data.sender,
       })
 
       if (!data.sender.muted) {
-				playSound(data.sender.sendingSound  || "sending.mp3")
-			}
+        playSound(data.sender.sendingSound || "sending.mp3")
+      }
 
-      messageForm.reset()
       socket.current?.emit("newChatCreated", {
         message: data.message,
         receiver: data.receiver,
         sender: data.sender,
       })
-
-     
     } catch {
+      setMessages((prev) => prev.filter((m) => m._id !== tempId))
+      setAllMessages((prev) => prev.filter((m) => m._id !== tempId))
+      await getChats()
       toast({ description: "Failed to send message", variant: "destructive" })
+      messageForm.reset({
+        text: payload.text,
+        image: payload.image || "",
+      })
     } finally {
       setCreating(false)
     }
@@ -631,7 +698,7 @@ const onTyping = (e: ChangeEvent<HTMLInputElement>) => {
     return undefined; // handle failure
   }
 };
-
+const OWNER_ID = process.env.NEXT_PUBLIC_OWNER_ID || "69045c8a92aa1cd5d930fef9"
 
   // 🔹 RENDER
   return (
@@ -640,6 +707,7 @@ const onTyping = (e: ChangeEvent<HTMLInputElement>) => {
           <ModalAddContact contactForm={contactForm} onCreateContact={onCreateContact}/>
           {/* <ModalCreateGroup contacts={contacts} groupForm={groupForm} onCreateGroup={onCreateGroup}/> */}
           <ModalUploadFile onSubmitMessage={onSubmitMessage}/>
+        <ModalContactOwner contacts={contacts}/> 
       </div>
 
       <div  className={`

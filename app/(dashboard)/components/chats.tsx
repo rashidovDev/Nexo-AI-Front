@@ -81,7 +81,7 @@ useEffect(() => {
   setUnreadChatCount(unreadChatCount)
 }, [unreadChatCount])
 
-console.log("FILTER", filterChats)
+
 let statusIcon: JSX.Element | null = null;
 
 
@@ -113,7 +113,7 @@ if (!chat?.isGroup) {
         }  
         setCurrentChatUser(otherUser)
         setCurrentChatId(chat._id)
-        console.log('ALL MESSAGES BEFORE FILTER', otherUser)
+      
 
        const chatMessages = allMessages.filter(m => m.chat?.toString() === chat._id.toString());
        setAllMessages(chatMessages);

@@ -20,7 +20,7 @@ const StateAuth = () => {
   <QrLoginBox />
 ) : null}
 {step === 'login' && <Social/>} 
-  <div><Button onClick={() => {
+  <div className="hidden md:block"><Button onClick={() => {
     if(step == 'qr'){
       setStep('login')
     }else{
