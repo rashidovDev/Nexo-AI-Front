@@ -20,14 +20,14 @@ export const authOptions: NextAuthOptions = {
         if (credentials?.qrUserId) {
           const user = await User.findById(credentials.qrUserId)
           if (!user) return null
-          console.log("QR LOGIN USER", user)
+          // console.log("QR LOGIN USER", user)
           return user
         }
 
         // ✅ Normal login
         if (credentials?.email) {
           const user = await User.findOne({ email: credentials.email })
-          console.log('USER AUTH', user)
+          // console.log('USER AUTH', user)
           return user
         }
 
@@ -48,7 +48,7 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async session({ session }) {
-      console.log('SESSION CALLBACK', session)
+      // console.log('SESSION CALLBACK', session)
       await connectToDatabase()
 
       const isExistingUser = await User.findOne({
