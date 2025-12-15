@@ -735,8 +735,10 @@ const OWNER_ID = process.env.NEXT_PUBLIC_OWNER_ID || "69045c8a92aa1cd5d930fef9"
           ) : (
             selectedOption === "settings" && <Settings />
           )}
+<div >
 
           <Footer />
+</div>
         </div>
       </div>
 
