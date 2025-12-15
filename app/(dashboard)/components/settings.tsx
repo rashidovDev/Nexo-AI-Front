@@ -98,13 +98,13 @@ const Settings = () => {
 
   return (
     <div className='px-3 relative h-[600px] '>
-      <div className='flex justify-between md:hidden cursor-pointer  items-center absolute -bottom-10 right-6  hover:bg-secondary rounded-md '>
+      <div className='flex justify-between  cursor-pointer  items-center absolute -bottom-12 right-6  hover:bg-secondary rounded-md '>
 						 <div
                     onClick={() => router.push("/qr/camera")}
                     className="flex flex-col justify-center items-center hover:text-green-500 my-2
                      text-[10px]  cursor-pointer transition-colors"
                   >
-
+AAAAA
                     <QrCode className='' size={24} />
                     <p className="text-[10px] mt-1 text-xs">Scan QR</p>
                   </div>
@@ -166,7 +166,6 @@ const Settings = () => {
 							/>
 						</div>
 
-            
 
      <div 
 	 onClick={() => signOut()}
