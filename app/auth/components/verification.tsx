@@ -53,7 +53,7 @@ const Verify  = () => {
 
        onSuccess: async ({user}) => {
         console.log("USER",user.email)
-        await signIn('credentials', { email: user.email })
+        await signIn('credentials', { email: user.email, redirect: false })
        toast({ description: 'Successfully verified' })
         },
 
