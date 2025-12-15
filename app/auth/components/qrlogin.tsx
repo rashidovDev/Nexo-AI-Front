@@ -13,6 +13,7 @@ const QrLoginBox = () => {
   const [qrId, setQrId] = useState<string>("")
   const [status, setStatus] = useState<Status>("loading")
   const [error, setError] = useState<string | null>(null)
+  const [appUrl, setAppUrl] = useState<string>(process.env.NEXT_PUBLIC_APP_URL || "")
 
   const createQr = async () => {
     try {
@@ -33,6 +34,12 @@ const QrLoginBox = () => {
   useEffect(() => {
     createQr()
   }, [])
+
+  useEffect(() => {
+    if (!appUrl && typeof window !== "undefined") {
+      setAppUrl(window.location.origin)
+    }
+  }, [appUrl])
 
   // poll status
   useEffect(() => {
@@ -85,7 +92,7 @@ const QrLoginBox = () => {
     }
   }, [qrId, status])
 
-  const qrUrl = `${process.env.NEXT_PUBLIC_APP_URL}/qr/scan?qrId=${qrId}`
+  const qrUrl = appUrl ? `${appUrl}/qr/scan?qrId=${qrId}` : ""
 
   return (
     <div className="flex flex-col items-center gap-3 mt-4">
@@ -99,7 +106,7 @@ const QrLoginBox = () => {
       wrapperClass=""
     /></div>}
 
-      {status === "pending" && qrId && (
+      {status === "pending" && qrId && qrUrl && (
         <>
           {/* <h3 className="text-2xl font-semibold">Log in to Nexo AI by QR Code</h3> */}
           <QRCode value={qrUrl} size={180} />

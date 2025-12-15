@@ -171,7 +171,7 @@ const Settings = () => {
 	 onClick={() => signOut()}
 	 className='flex justify-between items-center bg-destructive p-2 cursor-pointer rounded-md my-2' >
 							<div className='flex items-center gap-1'>
-								<LogIn size={16} className='text-white' />
+								<QrCode size={16} className='text-white' />
 								<span className='text-sm  text-white'>Logout</span>
 							</div>
 						</div>
@@ -181,7 +181,7 @@ const Settings = () => {
 	 className='flex justify-between items-center bg-green-400 p-2 cursor-pointer rounded-md my-2' >
 							<div className='flex items-center gap-1'>
 								<LogIn size={16} className='text-white' />
-								<span className='text-sm  text-white'>Logout</span>
+								<span className='text-sm  text-white'>Link Desktop device</span>
 							</div>
 						</div>
 
