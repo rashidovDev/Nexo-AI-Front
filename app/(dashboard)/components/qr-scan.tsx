@@ -3,7 +3,7 @@
 import { Scanner } from "@yudiel/react-qr-scanner"
 import { useSession } from "next-auth/react"
 import { useState } from "react"
-import { apiClient } from "@/api/axios"
+import { apiClient } from "@/services/api/axios"
 import { generateToken } from "@/lib/generate-token"
 
 export default function QrCameraPage() {

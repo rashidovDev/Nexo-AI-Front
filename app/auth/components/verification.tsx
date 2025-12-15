@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input'
 import { REGEXP_ONLY_DIGITS } from 'input-otp'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/services/use-auth'
-import { apiClient } from '@/api/axios'
+import { apiClient } from '@/services/api/axios'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from '@/hooks/use-toast'
 import { IError } from '@/types'
@@ -53,7 +53,7 @@ const Verify  = () => {
 
        onSuccess: async ({user}) => {
         console.log("USER",user.email)
-        await signIn('credentials', { email: user.email, redirect: false })
+        await signIn('credentials', { email: user.email })
        toast({ description: 'Successfully verified' })
         },
 

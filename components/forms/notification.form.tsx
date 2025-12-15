@@ -9,7 +9,7 @@ import { Separator } from '../ui/separator'
 import { useSession } from 'next-auth/react'
 import { useMutation } from '@tanstack/react-query'
 import { generateToken } from '@/lib/generate-token'
-import { apiClient } from '@/api/axios'
+import { apiClient } from '@/services/api/axios'
 import { toast } from '@/hooks/use-toast'
 import { Switch } from '../ui/switch'
 

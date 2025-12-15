@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useRouter } from "next/navigation"
 import { useCurrentChatUser } from "@/services/current-chat"
 import { useSelectedOption } from "@/services/current-option"
-import { apiClient } from "@/api/axios"
+import { apiClient } from "@/services/api/axios"
 import { generateToken } from "@/lib/generate-token"
 import { useSession } from "next-auth/react"
 

@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from '../ui/input'
 import { generateToken } from '@/lib/generate-token'
-import { apiClient } from '@/api/axios'
+import { apiClient } from '@/services/api/axios'
 import { signOut, useSession } from 'next-auth/react'
 import { useMutation } from '@tanstack/react-query'
 

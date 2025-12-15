@@ -1,6 +1,6 @@
 "use client"
 
-import { apiClient } from '@/api/axios'
+import { apiClient } from '@/services/api/axios'
 import ModeToggle from '@/components/ui/custom/mode-toggle'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/hooks/use-toast'

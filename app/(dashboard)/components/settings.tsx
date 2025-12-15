@@ -1,5 +1,5 @@
 "use client"
-import { apiClient } from '@/api/axios'
+import { apiClient } from '@/services/api/axios'
 import DangerZoneForm from '@/components/forms/danger.zone'
 import EmailForm from '@/components/forms/email.form'
 import InformationForm from '@/components/forms/information.form'

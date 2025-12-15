@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react"
 import QRCode from "react-qr-code"
 import { signIn } from "next-auth/react"
-import { apiClient } from "@/api/axios"
+import { apiClient } from "@/services/api/axios"
 import { Oval } from 'react-loader-spinner'
 
 
