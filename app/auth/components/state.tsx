@@ -1,6 +1,5 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import QrLoginBox from "./qrlogin"
 import Signin from "./signin"
 import Verify from "./verification"
@@ -8,30 +7,25 @@ import { useAuthStore } from "@/services/use-auth"
 import Social from "./social"
 
 const StateAuth = () => {
-  const {step, setStep} = useAuthStore()
-  return (
-    <>
-  
-   {step === 'login' ? (
-  <Signin />
-) : step === 'verify' ? (
-  <Verify />
-) : step === 'qr' ? (
-  <QrLoginBox />
-) : null}
-{step === 'login' && <Social/>} 
-  <div className="hidden md:block"><Button onClick={() => {
-    if(step == 'qr'){
-      setStep('login')
-    }else{
-setStep('qr')
-    }
-  } }  className='bg-transparent hover:bg-primary transition-all text-sm text-primary mt-3 hover:text-white'>
-        {step === 'qr' ? 'LOG IN BY CREDENTIALS' : 'LOG IN BY QR CODE'} 
-       </Button></div>
+  const { step } = useAuthStore()
 
-            
-    </>
+  return (
+    <div className="w-full flex flex-col md:flex-row md:items-start gap-10">
+      <div className="flex-1 space-y-4">
+        {step === "login" ? <Signin /> : <Verify />}
+        {step === "login" && <Social />}
+      </div>
+
+      <div className="hidden md:flex w-full max-w-sm flex-col gap-4 rounded-2xl border bg-secondary/30 p-6 shadow-sm">
+        <div className="text-center space-y-1">
+          <h3 className="text-xl font-semibold">Log in with your phone</h3>
+          <p className="text-sm text-muted-foreground">
+            Open the mobile app, go to Settings {" > "} Link Desktop Device, then scan the QR code.
+          </p>
+        </div>
+        <QrLoginBox />
+      </div>
+    </div>
   )
 }
 

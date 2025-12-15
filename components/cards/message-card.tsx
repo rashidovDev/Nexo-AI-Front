@@ -30,7 +30,7 @@ interface Props {
 
 const MessageCard : FC <Props> = ({message, onReaction, onDeleteMessage}) => {
 
-  console.log('message', message)
+
 
     const {data : session} = useSession()
     

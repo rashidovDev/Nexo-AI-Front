@@ -1,9 +1,9 @@
- import { IUser } from '@/types'
+import { IUser } from '@/types'
 import { create } from 'zustand'
 
 interface State {
-  step : 'login' |  'verify' |  "qr"
-  setStep : (step : 'login' |  'verify' | 'qr') => void
+  step : 'login' |  'verify'
+  setStep : (step : 'login' |  'verify') => void
   email : string    
   setEmail : (email : string) => void
   onlineUsers : IUser[]

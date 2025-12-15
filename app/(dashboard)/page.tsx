@@ -719,7 +719,7 @@ const OWNER_ID = process.env.NEXT_PUBLIC_OWNER_ID || "69045c8a92aa1cd5d930fef9"
         <div className="md:w-[20%] md:block hidden">
           <LeftBar />
         </div>
-        <div className="w-[100%] mx-auto border-l relative">
+        <div className="w-[100%] mx-auto border-l relative pb-[6svh] md:pb-0">
           <Header />
           {selectedOption === 'chats' && <div className="w-[90%] mx-auto md:hidden mb-2">
             <LeftBar />
