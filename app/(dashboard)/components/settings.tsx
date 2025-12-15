@@ -104,7 +104,7 @@ const Settings = () => {
                     className="flex flex-col justify-center items-center hover:text-green-500 my-2
                      text-[10px]  cursor-pointer transition-colors"
                   >
-AAAAA
+
                     <QrCode className='' size={24} />
                     <p className="text-[10px] mt-1 text-xs">Scan QR</p>
                   </div>
@@ -175,6 +175,16 @@ AAAAA
 								<span className='text-sm  text-white'>Logout</span>
 							</div>
 						</div>
+
+            <div 
+	  onClick={() => router.push("/qr/camera")}
+	 className='flex justify-between items-center bg-green-400 p-2 cursor-pointer rounded-md my-2' >
+							<div className='flex items-center gap-1'>
+								<LogIn size={16} className='text-white' />
+								<span className='text-sm  text-white'>Logout</span>
+							</div>
+						</div>
+
 
     <Sheet open={isProfileOpen} onOpenChange={setIsProfileOpen}>
 		<SheetContent side={'left'} className='md:w-[350px] w-full p-2 max-md:w-full'>
