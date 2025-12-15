@@ -98,7 +98,7 @@ const Settings = () => {
 
   return (
     <div className='px-3 relative h-[600px] '>
-      <div className='flex justify-between  cursor-pointer  items-center absolute -bottom-12 right-6  hover:bg-secondary rounded-md '>
+      {/* <div className='flex justify-between  cursor-pointer  items-center absolute -bottom-12 right-6  hover:bg-secondary rounded-md '>
 						 <div
                     onClick={() => router.push("/qr/camera")}
                     className="flex flex-col justify-center items-center hover:text-green-500 my-2
@@ -108,7 +108,7 @@ const Settings = () => {
                     <QrCode className='' size={24} />
                     <p className="text-[10px] mt-1 text-xs">Scan QR</p>
                   </div>
-						</div>
+						</div> */}
 
      <div className='flex items-center justify-between mb-5 cursor-pointer' onClick={() => setIsProfileOpen(true)}>
       <div className='flex items-center'>
@@ -166,24 +166,24 @@ const Settings = () => {
 							/>
 						</div>
 
-
-     <div 
-	 onClick={() => signOut()}
-	 className='flex justify-between items-center bg-destructive p-2 cursor-pointer rounded-md my-2' >
-							<div className='flex items-center gap-1'>
-								<QrCode size={16} className='text-white' />
-								<span className='text-sm  text-white'>Logout</span>
-							</div>
-						</div>
-
-            <div 
+<div 
 	  onClick={() => router.push("/qr/camera")}
-	 className='flex justify-between items-center bg-green-400 p-2 cursor-pointer rounded-md my-2' >
+	 className='flex justify-between md:hidden items-center bg-green-400 p-2 cursor-pointer rounded-md my-2' >
 							<div className='flex items-center gap-1'>
 								<LogIn size={16} className='text-white' />
 								<span className='text-sm  text-white'>Link Desktop device</span>
 							</div>
 						</div>
+     <div 
+	 onClick={() => signOut()}
+	 className='flex justify-between items-center bg-destructive p-2 cursor-pointer rounded-md my-2' >
+							<div className='flex items-center gap-1'>
+								<LogIn size={16} className='text-white' />
+								<span className='text-sm  text-white'>Logout</span>
+							</div>
+						</div>
+
+            
 
 
     <Sheet open={isProfileOpen} onOpenChange={setIsProfileOpen}>
