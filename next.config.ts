@@ -3,16 +3,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
-  // ✅ Allow build even if ESLint errors exist
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
-  // ✅ Allow build even if TypeScript has strict errors
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
   images: {
     remotePatterns: [
       {
