@@ -2,8 +2,6 @@
 import { IoIosChatbubbles } from "react-icons/io";
 import { FaRegUserCircle } from "react-icons/fa";
 import { IoSettingsOutline } from "react-icons/io5";
-
-import React from "react";
 import { useSelectedOption } from "@/services/current-option";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +24,7 @@ const Footer = () => {
         flex justify-around items-center
         h-[6svh]
         border-t md:bg-transparent bg-background
-      "
+        "
     >
       {icons.map(({ id, name, icon: Icon }) => (
         <div
@@ -47,7 +45,6 @@ const Footer = () => {
     </div>
   );
 };
-
 
 export default Footer;
 

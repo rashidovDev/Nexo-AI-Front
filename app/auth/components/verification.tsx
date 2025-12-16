@@ -29,6 +29,7 @@ import { toast } from '@/hooks/use-toast'
 import { IError } from '@/types'
 import { signIn, signOut } from 'next-auth/react'
 import { useRouter } from 'next/router'
+import { Oval } from 'react-loader-spinner'
 
 
 const Verify  = () => {
@@ -118,7 +119,16 @@ const Verify  = () => {
             </FormItem>
           )}
         />
-        <Button className='w-full' size={"lg"} type="submit" disabled={isPending}>Submit</Button>
+        <Button className='w-full' size={"lg"} type="submit" disabled={isPending}>Submit
+           {isPending && <span><Oval
+                        height={60}
+                        width={60}
+                        color="#ffff"
+                        // ariaLabel="audio-loading"
+                        wrapperStyle={{}}
+                        wrapperClass=""
+                      /></span>}
+        </Button>
       </form>
     </Form>
     </div>
